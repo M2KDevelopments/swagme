@@ -1,0 +1,22 @@
+{
+  "name": "swag-auto",
+  "version": "1.0.0",
+  "description": "Node Js CLI tool that auto generates swagger api documentation for express web servers. Takes advantage of the MVC Pattern",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.5.0",
+    "commander": "^14.0.0",
+    "figlet": "^1.8.2",
+    "inquirer": "^12.9.0",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2"
+  }
+}
