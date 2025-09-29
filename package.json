@@ -1,5 +1,5 @@
 {
-  "name": "swag-auto",
+  "name": "swagify",
   "version": "1.0.0",
   "description": "Node Js CLI tool that auto generates swagger api documentation for express web servers. Takes advantage of the MVC Pattern",
   "main": "index.js",
