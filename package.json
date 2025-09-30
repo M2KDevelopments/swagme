@@ -2,13 +2,40 @@
   "name": "swagify",
   "version": "1.0.0",
   "description": "Node Js CLI tool that auto generates swagger api documentation for express web servers. Takes advantage of the MVC Pattern",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
+  "author": "M2K Developments",
   "scripts": {
+    "dev": "tsc && node dist/index.js",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "bin": {
+    "swagify": "./index.js"
+  },
+  "homepage": "https://github.com/M2KDevelopments/swagify#readme",
+  "bugs": {
+    "url": "https://github.com/M2KDevelopments/swagify/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/M2KDevelopments/swagify.git"
+  },
+  "files": [
+    "/dist/*"
+  ],
+  "keywords": [
+    "swagify",
+    "swagger",
+    "swagger-docs",
+    "swagger-ui",
+    "documentation",
+    "express",
+    "mongoose",
+    "drizzle",
+    "primsa"
+  ],
   "license": "ISC",
   "dependencies": {
     "chalk": "^5.5.0",
@@ -18,6 +45,7 @@
     "ora": "^8.2.0"
   },
   "devDependencies": {
-    "@types/node": "^24.5.2"
+    "@types/node": "^24.5.2",
+    "typescript": "^5.9.2"
   }
 }
