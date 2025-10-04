@@ -1,5 +1,5 @@
 # Swagify
-![Static Badge](https://img.shields.io/badge/v1.0.3-maroon?style=plastic&logo=npm&logoColor=maroon&logoSize=20&label=version)
+![Static Badge](https://img.shields.io/badge/v1.0.0-maroon?style=plastic&logo=npm&logoColor=maroon&logoSize=20&label=version)
 ![Static Badge](https://img.shields.io/badge/MIT-green?style=plastic&logo=license&logoColor=green&label=license)
 ![Static Badge](https://img.shields.io/badge/m2kdevelopments-purple?style=plastic&logo=github&logoColor=purple&label=developer&link=https%3A%2F%2Fgithub.com%2Fm2kdevelopments)
 ![Static Badge](https://img.shields.io/badge/buy_me_a_coffee-yellow?style=plastic&logo=buymeacoffee&logoColor=yellow&label=support&link=https%3A%2F%2Fwww.buymeacoffee.com%2Fm2kdevelopments)

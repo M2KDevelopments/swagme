@@ -1,4 +1,4 @@
-import { ISwagifyRoute } from "../interfaces/swagify.route";
+import { ISwagifyRoute } from "../interfaces/swagify.route.ts";
 import fs from 'fs/promises';
 import path from 'path';
 

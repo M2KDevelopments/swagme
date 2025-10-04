@@ -1,10 +1,10 @@
 import path from 'path';
 import fs from 'fs/promises';
 import chalk from 'chalk';
-import { ISwagifyRoute } from '../interfaces/swagify.route';
-import { ISwagifySchema } from '../interfaces/swagify.schema';
-import { ISwaggerConfig } from '../interfaces/swagify.config';
-import { CONSTANTS } from './constants';
+import { ISwagifyRoute } from '../interfaces/swagify.route.ts';
+import { ISwagifySchema } from '../interfaces/swagify.schema.ts';
+import { ISwaggerConfig } from '../interfaces/swagify.config.ts';
+import { CONSTANTS } from './constants.ts';
 
 export async function generateSwaggerJson(config_json: ISwaggerConfig, __dirname: string) {
 

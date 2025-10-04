@@ -1,4 +1,4 @@
-import { ISwagifySchema } from "../interfaces/swagify.schema";
+import { ISwagifySchema } from "../interfaces/swagify.schema.ts";
 
 export function getPrimsaSchemaFromFile(filename: string, file: string) {
     const swaggerSchemas = [] as Array<ISwagifySchema>;

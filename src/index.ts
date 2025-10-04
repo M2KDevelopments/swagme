@@ -4,20 +4,20 @@ import { program } from "commander";
 import inquirer from "inquirer";
 import path, { dirname } from 'path';
 import fs from 'fs/promises';
-import { generateSwaggerJson, createDocsFolder, generateSwagifyRouteFiles, generateSwagifySchemaFiles, updateGitignore } from './helpers/creatingfiles';
-import { readPackageJSON, readConfigJSON, detectMainExpressFile } from './helpers/readingfiles';
-import { CONSTANTS } from './helpers/constants';
-import { getFilePathPrompts, getProjectPrompts } from './helpers/prompts';
-import { ISwagifySchema } from './interfaces/swagify.schema';
-import { ISwagifyRoute } from './interfaces/swagify.route';
+import { generateSwaggerJson, createDocsFolder, generateSwagifyRouteFiles, generateSwagifySchemaFiles, updateGitignore } from './helpers/creatingfiles.ts';
+import { readPackageJSON, readConfigJSON, detectMainExpressFile } from './helpers/readingfiles.ts';
+import { CONSTANTS } from './helpers/constants.ts';
+import { getFilePathPrompts, getProjectPrompts } from './helpers/prompts.ts';
+import { ISwagifySchema } from './interfaces/swagify.schema.ts';
+import { ISwagifyRoute } from './interfaces/swagify.route.ts';
 
 // Get base directory - https://dev.to/adrvnc/how-to-resolve-the-dirname-is-not-defined-in-es-module-scope-error-in-javascript-584
 import { fileURLToPath } from 'url';
-import { getMongooseSchemaFromFile } from './database/mongoose';
-import { getPrimsaSchemaFromFile } from './database/primsa';
-import { getDrizzleSchemaFromFile } from './database/drizzle';
-import { getSwaggerInfoFromExpressRoutes } from './helpers/readendpoints';
-import { generateREADME } from './helpers/readme';
+import { getMongooseSchemaFromFile } from './database/mongoose.ts';
+import { getPrimsaSchemaFromFile } from './database/primsa.ts';
+import { getDrizzleSchemaFromFile } from './database/drizzle.ts';
+import { getSwaggerInfoFromExpressRoutes } from './helpers/readendpoints.ts';
+import { generateREADME } from './helpers/readme.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

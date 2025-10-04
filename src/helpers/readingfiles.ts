@@ -1,9 +1,9 @@
 import path from 'path';
 import fs from 'fs/promises';
 import chalk from 'chalk';
-import { IPackageJSON } from '../interfaces/package.json';
-import { ISwaggerConfig } from '../interfaces/swagify.config';
-import { CONSTANTS } from './constants';
+import { IPackageJSON } from '../interfaces/package.json.ts';
+import { ISwaggerConfig } from '../interfaces/swagify.config.ts';
+import { CONSTANTS } from './constants.ts';
 
 export async function readPackageJSON(__dirname: string): Promise<{ json: IPackageJSON | null, error: string | null | any }> {
     try {
