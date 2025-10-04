@@ -1,4 +1,4 @@
-export interface ISwagifyRoute{ 
+export interface ISwagmeRoute{ 
     filename: string, 
     tagname: string, 
     baseroute: string, 

@@ -1,7 +1,7 @@
-import { ISwagifySchema } from "../interfaces/swagify.schema.ts";
+import { ISwagmeSchema } from "../interfaces/swagme.schema.ts";
 
 export function getMongooseSchemaFromFile(filename: string, file: string) {
-    const swaggerSchemas = [] as Array<ISwagifySchema>;
+    const swaggerSchemas = [] as Array<ISwagmeSchema>;
     if (file.indexOf('.Schema(') != -1) {
 
         // counters for '{' and  '}'

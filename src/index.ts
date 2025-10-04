@@ -4,12 +4,12 @@ import { program } from "commander";
 import inquirer from "inquirer";
 import path, { dirname } from 'path';
 import fs from 'fs/promises';
-import { generateSwaggerJson, createDocsFolder, generateSwagifyRouteFiles, generateSwagifySchemaFiles, updateGitignore } from './helpers/creatingfiles.ts';
+import { generateSwaggerJson, createDocsFolder, generateSwagmeRouteFiles, generateSwagmeSchemaFiles, updateGitignore } from './helpers/creatingfiles.ts';
 import { readPackageJSON, readConfigJSON, detectMainExpressFile } from './helpers/readingfiles.ts';
 import { CONSTANTS } from './helpers/constants.ts';
 import { getFilePathPrompts, getProjectPrompts } from './helpers/prompts.ts';
-import { ISwagifySchema } from './interfaces/swagify.schema.ts';
-import { ISwagifyRoute } from './interfaces/swagify.route.ts';
+import { ISwagmeSchema } from './interfaces/swagme.schema.ts';
+import { ISwagmeRoute } from './interfaces/swagme.route.ts';
 
 // Get base directory - https://dev.to/adrvnc/how-to-resolve-the-dirname-is-not-defined-in-es-module-scope-error-in-javascript-584
 import { fileURLToPath } from 'url';
@@ -30,7 +30,7 @@ program
 
 
 // Show Title
-console.log(chalk.yellow(figlet.textSync("Swagify", { horizontalLayout: "full" })));
+console.log(chalk.yellow(figlet.textSync("Swagme", { horizontalLayout: "full" })));
 console.log(chalk.yellowBright('Auto Swagger Documentation'), 'Let\'s Get Started!');
 
 
@@ -62,7 +62,7 @@ async function init() {
     const mainRouteFile = await detectMainExpressFile(__dirname);
 
     // Check for config file data
-    if (config_json && config_json.name) console.log('Swagify config file detected', chalk.green(CONSTANTS.config_file));
+    if (config_json && config_json.name) console.log('Swagme config file detected', chalk.green(CONSTANTS.config_file));
 
     // process actions
     program.action(async () => {
@@ -136,7 +136,7 @@ async function init() {
 
 
         // read schemas and models
-        const swaggerSchemas = [] as Array<ISwagifySchema>;
+        const swaggerSchemas = [] as Array<ISwagmeSchema>;
         if (schemaFiles.length) {
             const list = answersForFiles.schemafiles.includes("SELECT ALL") ? schemaFiles : answersForFiles.schemafiles
             const foldername = answersProject.schema;
@@ -169,14 +169,14 @@ async function init() {
 
 
         // reads routes from files
-        const swaggerRoutes: Array<ISwagifyRoute> = await getSwaggerInfoFromExpressRoutes(__dirname, answersProject.routes, answersProject.main, routesFiles);
+        const swaggerRoutes: Array<ISwagmeRoute> = await getSwaggerInfoFromExpressRoutes(__dirname, answersProject.routes, answersProject.main, routesFiles);
 
 
 
 
         /* *******************************************
         *
-        *    Generate swagify files in folder
+        *    Generate swagme files in folder
         *
         * *******************************************/
 
@@ -192,10 +192,10 @@ async function init() {
         await fs.writeFile(path.join(__dirname, CONSTANTS.config_file), JSON.stringify(answersProject), 'utf-8');
 
         // 3. Generate route files
-        await generateSwagifyRouteFiles(docsFolder, swaggerRoutes)
+        await generateSwagmeRouteFiles(docsFolder, swaggerRoutes)
 
         // 4. Generate schema files
-        await generateSwagifySchemaFiles(docsFolder, swaggerSchemas);
+        await generateSwagmeSchemaFiles(docsFolder, swaggerSchemas);
 
         // 5. Update .gitignore if necessary
         await updateGitignore(answersProject.gitignore, __dirname, answersProject.docs);

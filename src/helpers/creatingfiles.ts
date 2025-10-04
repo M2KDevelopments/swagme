@@ -1,9 +1,9 @@
 import path from 'path';
 import fs from 'fs/promises';
 import chalk from 'chalk';
-import { ISwagifyRoute } from '../interfaces/swagify.route.ts';
-import { ISwagifySchema } from '../interfaces/swagify.schema.ts';
-import { ISwaggerConfig } from '../interfaces/swagify.config.ts';
+import { ISwagmeRoute } from '../interfaces/swagme.route.ts';
+import { ISwagmeSchema } from '../interfaces/swagme.schema.ts';
+import { ISwaggerConfig } from '../interfaces/swagme.config.ts';
 import { CONSTANTS } from './constants.ts';
 
 export async function generateSwaggerJson(config_json: ISwaggerConfig, __dirname: string) {
@@ -120,7 +120,7 @@ export async function createDocsFolder(docsFolder: string): Promise<{ error: boo
 }
 
 
-export async function generateSwagifySchemaFiles(docsFolder: string, swaggerSchemas: Array<ISwagifySchema>) {
+export async function generateSwagmeSchemaFiles(docsFolder: string, swaggerSchemas: Array<ISwagmeSchema>) {
     for (const { tablename, fields, filename } of swaggerSchemas) {
 
         const properties = {} as any;
@@ -143,7 +143,7 @@ export async function generateSwagifySchemaFiles(docsFolder: string, swaggerSche
     }
 }
 
-export async function generateSwagifyRouteFiles(docsFolder: string, swaggerRoutes: Array<ISwagifyRoute>) {
+export async function generateSwagmeRouteFiles(docsFolder: string, swaggerRoutes: Array<ISwagmeRoute>) {
     for (const { baseroute, filename, routes, tagname } of swaggerRoutes) {
 
         // Configure swagger endpoints
@@ -198,7 +198,7 @@ export async function updateGitignore(shouldGitignore: boolean, __dirname: strin
         const gitignore = await fs.readFile(path.join(__dirname, '.gitignore'), 'utf-8');
         const filesHaveNotBeenIgnored = !(gitignore.includes(configDocsFolder) && gitignore.includes(CONSTANTS.config_file));
         if (filesHaveNotBeenIgnored && shouldGitignore) {
-            const additions = `\n\n# Ignore Swagify Files\n/docs\n${CONSTANTS.config_file}\n`;
+            const additions = `\n\n# Ignore Swagme Files\n/docs\n${CONSTANTS.config_file}\n`;
             await fs.appendFile(path.join(__dirname, '.gitignore'), additions, 'utf-8');
         }
     } catch (e) {

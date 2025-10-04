@@ -1,7 +1,7 @@
-import { ISwagifySchema } from "../interfaces/swagify.schema.ts";
+import { ISwagmeSchema } from "../interfaces/swagme.schema.ts";
 
 export function getDrizzleSchemaFromFile(filename: string, file: string) {
-    const swaggerSchemas: ISwagifySchema[] = [];
+    const swaggerSchemas: ISwagmeSchema[] = [];
 
   // Remove comments
   const cleanFile = file.replace(/\/\/.*|\/\*[\s\S]*?\*\//g, "").trim();

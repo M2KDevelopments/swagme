@@ -1,11 +1,11 @@
-import { ISwagifyRoute } from "../interfaces/swagify.route.ts";
+import { ISwagmeRoute } from "../interfaces/swagme.route.ts";
 import fs from 'fs/promises';
 import path from 'path';
 
 
 export async function getSwaggerInfoFromExpressRoutes(__dirname: string, routeAnswer: string, mainFileAnswer: string, routesFileNames: Array<string>) {
 
-    const swaggerRoutes = [] as Array<ISwagifyRoute>;
+    const swaggerRoutes = [] as Array<ISwagmeRoute>;
     if (!routesFileNames.length) return swaggerRoutes;
 
     

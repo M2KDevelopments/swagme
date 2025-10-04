@@ -1,5 +1,5 @@
 import { IPackageJSON } from "../interfaces/package.json.ts";
-import { ISwaggerConfig } from "../interfaces/swagify.config.ts";
+import { ISwaggerConfig } from "../interfaces/swagme.config.ts";
 
 export function getProjectPrompts(mainRouteFile: string, config_json: ISwaggerConfig | any, package_json: IPackageJSON) {
     return [
@@ -68,13 +68,13 @@ export function getProjectPrompts(mainRouteFile: string, config_json: ISwaggerCo
         {
             "type": "input",
             "name": "docs",
-            "message": "Where to put the swagify files?",
+            "message": "Where to put the swagme files?",
             "default": config_json.docs || "/docs"
         },
         {
             "type": "boolean",
             "name": "gitignore",
-            "message": "Git ignore Swagify files and folders?",
+            "message": "Git ignore Swagme files and folders?",
             "default": config_json.gitignore == undefined || true
         },
     ] as Array<any>
