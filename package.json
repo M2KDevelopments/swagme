@@ -1,6 +1,6 @@
 {
   "name": "swagme",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Node Js CLI tool that auto generates swagger api documentation for express web servers. Takes advantage of the MVC Pattern",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,7 +12,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "swagme": "dist/index.js"
+    "swagme": "node dist/index.js"
   },
   "homepage": "https://github.com/M2KDevelopments/swagme#readme",
   "bugs": {
