@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Add shebang to index.js file after npm run build
 import figlet from 'figlet';
 import chalk from 'chalk';
 import { program } from "commander";
