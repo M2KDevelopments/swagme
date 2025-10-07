@@ -2,7 +2,7 @@ export interface ISwaggerConfig {
     name: string,
     version: string,
     description: string,
-    authorization: string,
+    authorization: 'bearer' | 'basic' | 'none' | undefined,
     baseurl: string,
     main: string,
     database: string,

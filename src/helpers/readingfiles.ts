@@ -22,12 +22,24 @@ export async function readPackageJSON(__currentWorkingDir: string): Promise<{ js
 }
 
 
-export async function readConfigJSON(__currentWorkingDir: string): Promise<ISwaggerConfig | { name: null }> {
+export async function readConfigJSON(__currentWorkingDir: string): Promise<ISwaggerConfig> {
     try {
         const config_json = await fs.readFile(path.join(__currentWorkingDir, CONSTANTS.config_file), 'utf8');
         return JSON.parse(config_json) as ISwaggerConfig;
     } catch (e) {
-        return { name: null };
+        return {
+            name: '',
+            version: '',
+            description: '',
+            authorization: undefined,
+            baseurl: '',
+            main: '',
+            database: '',
+            schema: '',
+            routes: '',
+            docs: '',
+            gitignore: false
+        };
     }
 }
 
