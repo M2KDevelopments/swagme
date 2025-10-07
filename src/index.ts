@@ -1,30 +1,24 @@
 #!/usr/bin/env node
-// Add shebang to index.js file after npm run build
 import figlet from 'figlet';
 import chalk from 'chalk';
 import { program } from "commander";
 import inquirer from "inquirer";
-// import path, { dirname } from 'path';
 import path from 'path';
 import fs from 'fs/promises';
-import { generateSwaggerJson, createDocsFolder, generateSwagmeRouteFiles, generateSwagmeSchemaFiles, updateGitignore } from './helpers/creatingfiles';
+import { generateSwaggerFiles, createDocsFolder, generateSwagmeRouteFiles, generateSwagmeSchemaFiles, updateGitignore } from './helpers/creatingfiles';
 import { readPackageJSON, readConfigJSON, detectMainExpressFile } from './helpers/readingfiles';
 import { CONSTANTS } from './helpers/constants';
 import { getFilePathPrompts, getProjectPrompts } from './helpers/prompts';
 import { ISwagmeSchema } from './interfaces/swagme.schema';
 import { ISwagmeRoute } from './interfaces/swagme.route';
-
-// Get base directory - https://dev.to/adrvnc/how-to-resolve-the-dirname-is-not-defined-in-es-module-scope-error-in-javascript-584
-// import { fileURLToPath } from 'url';
 import { getMongooseSchemaFromFile } from './database/mongoose';
 import { getPrimsaSchemaFromFile } from './database/primsa';
 import { getDrizzleSchemaFromFile } from './database/drizzle';
 import { getSwaggerInfoFromExpressRoutes } from './helpers/readendpoints';
 import { generateREADME } from './helpers/readme';
+import { IAnswerPrompt } from './interfaces/answer.prompt';
 
-// const __filename = fileURLToPath(import.meta.url);
-const __currentWorkingDir = process.cwd()
- 
+
 // Initialization
 program
     .version("1.0.0")
@@ -38,6 +32,8 @@ console.log(chalk.yellowBright('Auto Swagger Documentation'), 'Let\'s Get Starte
 
 
 async function init() {
+
+    const __currentWorkingDir = process.cwd()
 
     // Read package.json
     const { json: package_json, error } = await readPackageJSON(__currentWorkingDir);
@@ -73,7 +69,7 @@ async function init() {
 
         // Get Project answers
         const prompts = getProjectPrompts(mainRouteFile, config_json, package_json);
-        const answersProject = await inquirer.prompt(prompts);
+        const answersProject = (await inquirer.prompt(prompts)) as IAnswerPrompt;
 
 
         // Validation Checks
@@ -194,20 +190,24 @@ async function init() {
         // 2. Create Swagger Config Files
         await fs.writeFile(path.join(__currentWorkingDir, CONSTANTS.config_file), JSON.stringify(answersProject), 'utf-8');
 
-        // 3. Generate route files
-        await generateSwagmeRouteFiles(docsFolder, swaggerRoutes)
-
-        // 4. Generate schema files
+        // 3. Generate schema files
         await generateSwagmeSchemaFiles(docsFolder, swaggerSchemas);
+
+        // 4. Generate route files
+        await generateSwagmeRouteFiles(docsFolder, swaggerRoutes, answersProject.authorization);
 
         // 5. Update .gitignore if necessary
         await updateGitignore(answersProject.gitignore, __currentWorkingDir, answersProject.docs);
 
         // 6. Generate Swagger Json
-        if (config_json && config_json.name) await generateSwaggerJson(config_json, __currentWorkingDir);
+        if (config_json && config_json.name) {
+            const json = true;
+            const yaml = true;
+            await generateSwaggerFiles(config_json, __currentWorkingDir, json, yaml);
+        } else console.warn(chalk.yellow('Coule not create swagger.json file'));
 
-        // 7. Done
-        console.log(chalk.blue(`${answersProject.name} (${answersProject.version})`), "has been", chalk.yellowBright('Swagified!'))
+        // 7. Done with swagme
+        console.log(chalk.blueBright(`${answersProject.name} (${answersProject.version})`), "has been", chalk.yellowBright('Swagged!'))
 
 
     });

@@ -5,8 +5,19 @@ import { ISwagmeRoute } from '../interfaces/swagme.route';
 import { ISwagmeSchema } from '../interfaces/swagme.schema';
 import { ISwaggerConfig } from '../interfaces/swagme.config';
 import { CONSTANTS } from './constants';
+import YAML from 'json-to-pretty-yaml';
 
-export async function generateSwaggerJson(config_json: ISwaggerConfig, __currentWorkingDir: string) {
+/**
+ * Generates swagger.json and swagger.yaml files based on the config.json and docs folder contents
+ * https://swagger.io/docs/specification/v2_0/basic-structure/
+ * @param {ISwaggerConfig} config_json - Swagme config file contents
+ * @param {string} __currentWorkingDir - Current working directory
+ * @param {boolean} [json=true] - Generate swagger.json file
+ * @param {boolean} [yaml=true] - Generate swagger.yaml file
+ * @returns {Promise<void>} - Resolves when the files have been generated
+ */
+
+export async function generateSwaggerFiles(config_json: ISwaggerConfig, __currentWorkingDir: string, json: boolean = true, yaml: boolean = true) {
 
     // config file check
     if (!(config_json && config_json.name)) return console.error(
@@ -46,6 +57,24 @@ export async function generateSwaggerJson(config_json: ISwaggerConfig, __current
                     "description": "Enter your JWT token (without 'Bearer ' prefix)",
                 }
             }
+            swagger_json['security'] = [
+                {
+                    "bearerAuth": []
+                }
+            ]
+        } else if (config_json.authorization == 'basic') {
+            swagger_json.components['securitySchemes'] = {
+                "basicAuth": {
+                    "type": "http",
+                    "scheme": "basic",
+                    "description": "Enter your basic auth credentials",
+                }
+            }
+            swagger_json['security'] = [
+                {
+                    "basicAuth": []
+                }
+            ]
         }
 
 
@@ -66,8 +95,12 @@ export async function generateSwaggerJson(config_json: ISwaggerConfig, __current
             swagger_json.paths = { ...swagger_json.paths, ...json }
         }
 
-        // Generate swagger.json file
-        await fs.writeFile(path.join(__currentWorkingDir, 'swagger.json'), JSON.stringify(swagger_json), 'utf-8');
+        // Generate swagger.json and swagger.yaml file
+        if (json) await fs.writeFile(path.join(__currentWorkingDir, 'swagger.json'), JSON.stringify(swagger_json), 'utf-8');
+        if (yaml) await fs.writeFile(path.join(__currentWorkingDir, 'swagger.yml'), YAML.stringify(swagger_json), 'utf-8');
+
+        if (json) console.log(chalk.green('swagger.json'), chalk.greenBright('file generated'));
+        if (yaml) console.log(chalk.green('swagger.yml'), chalk.greenBright('file generated'));
     } catch (e) {
         console.error(chalk.red(e))
     }
@@ -75,6 +108,14 @@ export async function generateSwaggerJson(config_json: ISwaggerConfig, __current
 }
 
 
+/**
+ * Creates a docs folder with 'schemas' and 'routes' subfolders.
+ * If the folder already exists, it will not be recreated.
+ * If there is an error creating the folder or subfolders, an error message will be logged.
+ * @param {string} docsFolder - The path where the docs folder will be created.
+ * @returns {Promise<{ error: boolean }>}
+ * @fulfill {error: boolean} - Returns an object with an error property set to true if there was an error creating the folder or subfolders.
+ */
 export async function createDocsFolder(docsFolder: string): Promise<{ error: boolean }> {
     try {
         await fs.mkdir(docsFolder);
@@ -120,6 +161,12 @@ export async function createDocsFolder(docsFolder: string): Promise<{ error: boo
 }
 
 
+/**
+ * Generates swagger schema files for express web server
+ * @param {string} docsFolder - path to the folder where swagger schema files will be generated
+ * @param {Array<ISwagmeSchema>} swaggerSchemas - array of swagger schema files
+ * @returns {Promise<void>} - promise that resolves when all files have been generated
+ */
 export async function generateSwagmeSchemaFiles(docsFolder: string, swaggerSchemas: Array<ISwagmeSchema>) {
     for (const { tablename, fields, filename } of swaggerSchemas) {
 
@@ -140,18 +187,34 @@ export async function generateSwagmeSchemaFiles(docsFolder: string, swaggerSchem
         // Create Swagger Config Files
         await fs.writeFile(path.join(docsFolder, "schemas", filename + ".json"), JSON.stringify(data), 'utf-8');
 
+        console.log('Model Added:', chalk.greenBright(tablename));
     }
 }
 
-export async function generateSwagmeRouteFiles(docsFolder: string, swaggerRoutes: Array<ISwagmeRoute>) {
+/**
+ * Generates swagger route files for express web server
+ * @param {string} docsFolder - path to the folder where swagger files will be generated
+ * @param {Array<ISwagmeRoute>} swaggerRoutes - array of swagger routes
+ * @returns {Promise<void>} - promise that resolves when all files have been generated
+ */
+export async function generateSwagmeRouteFiles(docsFolder: string, swaggerRoutes: Array<ISwagmeRoute>, securityType: 'bearer' | 'basic' | 'none' = 'none') {
+    const security = { security: [] as Array<any> };
+    if (securityType == 'bearer') security.security.push({ bearerAuth: [] });
+    else if (securityType == 'basic') security.security.push({ basicAuth: [] });
+
     for (const { baseroute, filename, routes, tagname } of swaggerRoutes) {
+
+        console.log('Added:', chalk.greenBright(baseroute));
 
         // Configure swagger endpoints
         const endpoints = {} as any;
         for (const { method, path } of routes) {
-            if (endpoints[path]) {
-                endpoints[path][method.toLowerCase()] = {
+            if (endpoints[baseroute + path]) {
+                endpoints[baseroute + path][method.toLowerCase()] = {
                     "summary": "API Documentation",
+                    "produces": ["application/json"],
+                    "tags": [tagname],
+                    ...security,
                     "responses": {
                         "200": {
                             "description": "Okay"
@@ -165,9 +228,12 @@ export async function generateSwagmeRouteFiles(docsFolder: string, swaggerRoutes
                     }
                 }
             } else {
-                endpoints[path] = {
+                endpoints[baseroute + path] = {
                     [method.toLowerCase()]: {
                         "summary": "API Documentation",
+                        "produces": ["application/json"],
+                        "tags": [tagname],
+                        ...security,
                         "responses": {
                             "200": {
                                 "description": "Okay"
@@ -192,6 +258,13 @@ export async function generateSwagmeRouteFiles(docsFolder: string, swaggerRoutes
 
 
 
+/**
+ * Updates .gitignore if necessary
+ * @param {boolean} shouldGitignore - whether to update .gitignore or not
+ * @param {string} __currentWorkingDir - path to the current working directory
+ * @param {string} configDocsFolder - path to the folder where swagger config files are located
+ * @returns {Promise<void>} - promise that resolves when .gitignore has been updated or not
+ */
 export async function updateGitignore(shouldGitignore: boolean, __currentWorkingDir: string, configDocsFolder: string) {
     // Update .gitignore if necessary
     try {
