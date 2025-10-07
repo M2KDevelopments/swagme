@@ -64,7 +64,8 @@ export function getMongooseSchemaFromFile(filename: string, file: string) {
                 */
 
                 const fields = [];
-                const mongoModelMatch = file.match(/(?<=model\W).*(?=,)/)
+                // match module.exports = 'mongoose.model('Assistant', schema);'
+                const mongoModelMatch = file.match(/(?<=model\(\W).*(?=,)/)
                 const tablename = mongoModelMatch ? mongoModelMatch[0]
                     // Remove all quotation marks
                     .replace("'", "")
