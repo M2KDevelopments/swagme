@@ -1,13 +1,14 @@
 {
   "name": "swagme",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Node Js CLI tool that auto generates swagger api documentation for express web servers. Takes advantage of the MVC Pattern",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "commonjs",
   "author": "M2K Developments",
   "scripts": {
-    "dev": "tsc && node dist/index.js",
+    "prod": "tsc && node dist/index.js",
+    "dev": " ts-node src/index.ts",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -49,6 +50,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.5.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   }
 }
