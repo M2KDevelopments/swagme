@@ -1,4 +1,4 @@
-import { ISwagmeSchema } from "../interfaces/swagme.schema.ts";
+import { ISwagmeSchema } from "../interfaces/swagme.schema";
 
 export function getMongooseSchemaFromFile(filename: string, file: string) {
     const swaggerSchemas = [] as Array<ISwagmeSchema>;

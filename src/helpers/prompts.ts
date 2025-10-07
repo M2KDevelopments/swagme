@@ -1,5 +1,5 @@
-import { IPackageJSON } from "../interfaces/package.json.ts";
-import { ISwaggerConfig } from "../interfaces/swagme.config.ts";
+import { IPackageJSON } from "../interfaces/package.json";
+import { ISwaggerConfig } from "../interfaces/swagme.config";
 
 export function getProjectPrompts(mainRouteFile: string, config_json: ISwaggerConfig | any, package_json: IPackageJSON) {
     return [

@@ -1,10 +1,10 @@
 import path from 'path';
 import fs from 'fs/promises';
 import chalk from 'chalk';
-import { ISwagmeRoute } from '../interfaces/swagme.route.ts';
-import { ISwagmeSchema } from '../interfaces/swagme.schema.ts';
-import { ISwaggerConfig } from '../interfaces/swagme.config.ts';
-import { CONSTANTS } from './constants.ts';
+import { ISwagmeRoute } from '../interfaces/swagme.route';
+import { ISwagmeSchema } from '../interfaces/swagme.schema';
+import { ISwaggerConfig } from '../interfaces/swagme.config';
+import { CONSTANTS } from './constants';
 
 export async function generateSwaggerJson(config_json: ISwaggerConfig, __dirname: string) {
 

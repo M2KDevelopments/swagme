@@ -1,4 +1,4 @@
-import { ISwagmeRoute } from "../interfaces/swagme.route.ts";
+import { ISwagmeRoute } from "../interfaces/swagme.route";
 import fs from 'fs/promises';
 import path from 'path';
 
