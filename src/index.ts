@@ -23,8 +23,8 @@ import { getSwaggerInfoFromExpressRoutes } from './helpers/readendpoints';
 import { generateREADME } from './helpers/readme';
 
 // const __filename = fileURLToPath(import.meta.url);
-// const __dirname = dirname(__filename);
-
+const __currentWorkingDir = process.cwd()
+ 
 // Initialization
 program
     .version("1.0.0")
@@ -40,8 +40,8 @@ console.log(chalk.yellowBright('Auto Swagger Documentation'), 'Let\'s Get Starte
 async function init() {
 
     // Read package.json
-    const { json: package_json, error } = await readPackageJSON(__dirname);
-    const config_json = await readConfigJSON(__dirname);
+    const { json: package_json, error } = await readPackageJSON(__currentWorkingDir);
+    const config_json = await readConfigJSON(__currentWorkingDir);
     if (error) return console.error(chalk.redBright(error));
 
     // Express dependency
@@ -62,7 +62,7 @@ async function init() {
     }
 
     // Auto scan for main file with 'app.use('/')' phrase
-    const mainRouteFile = await detectMainExpressFile(__dirname);
+    const mainRouteFile = await detectMainExpressFile(__currentWorkingDir);
 
     // Check for config file data
     if (config_json && config_json.name) console.log('Swagme config file detected', chalk.green(CONSTANTS.config_file));
@@ -100,12 +100,12 @@ async function init() {
 
         if (answersProject.schema) {
             try {
-                const list = await fs.readdir(path.join(__dirname, answersProject.schema));
+                const list = await fs.readdir(path.join(__currentWorkingDir, answersProject.schema));
                 schemaFiles.push(...list);
             } catch (e) {
                 return console.error(
                     chalk.red('Schema folder was not found:'),
-                    chalk.redBright(path.join(__dirname, answersProject.schema))
+                    chalk.redBright(path.join(__currentWorkingDir, answersProject.schema))
                 );
             }
         }
@@ -115,12 +115,12 @@ async function init() {
 
         // Get Route Files List
         try {
-            const list = await fs.readdir(path.join(__dirname, answersProject.routes));
+            const list = await fs.readdir(path.join(__currentWorkingDir, answersProject.routes));
             routesFiles.push(...list);
         } catch (e) {
             return console.error(
                 chalk.red('Routes folder was not found:'),
-                chalk.redBright(path.join(__dirname, answersProject.routes))
+                chalk.redBright(path.join(__currentWorkingDir, answersProject.routes))
             );
         }
 
@@ -146,21 +146,21 @@ async function init() {
             switch (answersProject.database) {
                 case "mongoose":
                     for (const filename of list) {
-                        const file = await fs.readFile(path.join(__dirname, foldername, filename), 'utf8')
+                        const file = await fs.readFile(path.join(__currentWorkingDir, foldername, filename), 'utf8')
                         const schemas = getMongooseSchemaFromFile(filename, file);
                         swaggerSchemas.push(...schemas);
                     }
                     break;
                 case "primsa":
                     for (const filename of list) {
-                        const file = await fs.readFile(path.join(__dirname, foldername, filename), 'utf8')
+                        const file = await fs.readFile(path.join(__currentWorkingDir, foldername, filename), 'utf8')
                         const schemas = getPrimsaSchemaFromFile(filename, file);
                         swaggerSchemas.push(...schemas);
                     }
                     break;
                 case "drizzle":
                     for (const filename of list) {
-                        const file = await fs.readFile(path.join(__dirname, foldername, filename), 'utf8')
+                        const file = await fs.readFile(path.join(__currentWorkingDir, foldername, filename), 'utf8')
                         const schemas = getDrizzleSchemaFromFile(filename, file);
                         swaggerSchemas.push(...schemas);
                     }
@@ -172,7 +172,7 @@ async function init() {
 
 
         // reads routes from files
-        const swaggerRoutes: Array<ISwagmeRoute> = await getSwaggerInfoFromExpressRoutes(__dirname, answersProject.routes, answersProject.main, routesFiles);
+        const swaggerRoutes: Array<ISwagmeRoute> = await getSwaggerInfoFromExpressRoutes(__currentWorkingDir, answersProject.routes, answersProject.main, routesFiles);
 
 
 
@@ -184,7 +184,7 @@ async function init() {
         * *******************************************/
 
         // 0. Create Directories
-        const docsFolder = path.join(__dirname, answersProject.docs);
+        const docsFolder = path.join(__currentWorkingDir, answersProject.docs);
         const { error } = await createDocsFolder(docsFolder)
         if (error) return; // Stop Process
 
@@ -192,7 +192,7 @@ async function init() {
         await generateREADME(docsFolder)
 
         // 2. Create Swagger Config Files
-        await fs.writeFile(path.join(__dirname, CONSTANTS.config_file), JSON.stringify(answersProject), 'utf-8');
+        await fs.writeFile(path.join(__currentWorkingDir, CONSTANTS.config_file), JSON.stringify(answersProject), 'utf-8');
 
         // 3. Generate route files
         await generateSwagmeRouteFiles(docsFolder, swaggerRoutes)
@@ -201,10 +201,10 @@ async function init() {
         await generateSwagmeSchemaFiles(docsFolder, swaggerSchemas);
 
         // 5. Update .gitignore if necessary
-        await updateGitignore(answersProject.gitignore, __dirname, answersProject.docs);
+        await updateGitignore(answersProject.gitignore, __currentWorkingDir, answersProject.docs);
 
         // 6. Generate Swagger Json
-        if (config_json && config_json.name) await generateSwaggerJson(config_json, __dirname);
+        if (config_json && config_json.name) await generateSwaggerJson(config_json, __currentWorkingDir);
 
         // 7. Done
         console.log(chalk.blue(`${answersProject.name} (${answersProject.version})`), "has been", chalk.yellowBright('Swagified!'))

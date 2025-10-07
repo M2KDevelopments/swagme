@@ -3,13 +3,13 @@ import fs from 'fs/promises';
 import path from 'path';
 
 
-export async function getSwaggerInfoFromExpressRoutes(__dirname: string, routeAnswer: string, mainFileAnswer: string, routesFileNames: Array<string>) {
+export async function getSwaggerInfoFromExpressRoutes(__currentWorkingDir: string, routeAnswer: string, mainFileAnswer: string, routesFileNames: Array<string>) {
 
     const swaggerRoutes = [] as Array<ISwagmeRoute>;
     if (!routesFileNames.length) return swaggerRoutes;
 
     
-    const mainFile = await fs.readFile(path.join(__dirname, mainFileAnswer), 'utf8')
+    const mainFile = await fs.readFile(path.join(__currentWorkingDir, mainFileAnswer), 'utf8')
 
 
     const baseRouteMap = new Map<string, string>(); // <file:string, baseroute:string>
@@ -67,7 +67,7 @@ export async function getSwaggerInfoFromExpressRoutes(__dirname: string, routeAn
     for (const f of routesFileNames) {
 
         // Read Route file
-        const file = await fs.readFile(path.join(__dirname, routeAnswer, f), 'utf8')
+        const file = await fs.readFile(path.join(__currentWorkingDir, routeAnswer, f), 'utf8')
 
         // Define variable to store route info
         const routes = [] as Array<{ method: string, path: string }>;

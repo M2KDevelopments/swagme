@@ -1,6 +1,6 @@
 {
   "name": "swagme",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Node Js CLI tool that auto generates swagger api documentation for express web servers. Takes advantage of the MVC Pattern",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

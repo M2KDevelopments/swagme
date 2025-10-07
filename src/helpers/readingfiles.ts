@@ -5,9 +5,9 @@ import { IPackageJSON } from '../interfaces/package.json';
 import { ISwaggerConfig } from '../interfaces/swagme.config';
 import { CONSTANTS } from './constants';
 
-export async function readPackageJSON(__dirname: string): Promise<{ json: IPackageJSON | null, error: string | null | any }> {
+export async function readPackageJSON(__currentWorkingDir: string): Promise<{ json: IPackageJSON | null, error: string | null | any }> {
     try {
-        const package_json = await fs.readFile(path.join(__dirname, 'package.json'), 'utf8');
+        const package_json = await fs.readFile(path.join(__currentWorkingDir, 'package.json'), 'utf8');
         return { json: JSON.parse(package_json) as IPackageJSON, error: null }
     } catch (e) {
         if (e instanceof Error) {
@@ -22,22 +22,22 @@ export async function readPackageJSON(__dirname: string): Promise<{ json: IPacka
 }
 
 
-export async function readConfigJSON(__dirname: string): Promise<ISwaggerConfig | { name: null }> {
+export async function readConfigJSON(__currentWorkingDir: string): Promise<ISwaggerConfig | { name: null }> {
     try {
-        const config_json = await fs.readFile(path.join(__dirname, CONSTANTS.config_file), 'utf8');
+        const config_json = await fs.readFile(path.join(__currentWorkingDir, CONSTANTS.config_file), 'utf8');
         return JSON.parse(config_json) as ISwaggerConfig;
     } catch (e) {
         return { name: null };
     }
 }
 
-export async function detectMainExpressFile(__dirname: string) {
-    const mainFiles = await fs.readdir(path.join(__dirname));
+export async function detectMainExpressFile(__currentWorkingDir: string) {
+    const mainFiles = await fs.readdir(path.join(__currentWorkingDir));
     let mainRouteFile = "/src/index.js";
     for (const mainfile of mainFiles) {
 
         if ((mainfile.lastIndexOf(".ts") == (mainfile.length - ".ts".length)) || (mainfile.lastIndexOf(".js") == (mainfile.length - ".js".length))) {
-            const file = await fs.readFile(path.join(__dirname, mainfile), 'utf-8');
+            const file = await fs.readFile(path.join(__currentWorkingDir, mainfile), 'utf-8');
             if (file.includes(".use(/")) {
                 console.log('Main route file detected as', chalk.green(mainfile));
                 mainRouteFile = `/${mainfile}`;

@@ -6,7 +6,7 @@ import { ISwagmeSchema } from '../interfaces/swagme.schema';
 import { ISwaggerConfig } from '../interfaces/swagme.config';
 import { CONSTANTS } from './constants';
 
-export async function generateSwaggerJson(config_json: ISwaggerConfig, __dirname: string) {
+export async function generateSwaggerJson(config_json: ISwaggerConfig, __currentWorkingDir: string) {
 
     // config file check
     if (!(config_json && config_json.name)) return console.error(
@@ -49,25 +49,25 @@ export async function generateSwaggerJson(config_json: ISwaggerConfig, __dirname
         }
 
 
-        const schemas = await fs.readdir(path.join(__dirname, config_json.docs, 'schemas'));
-        const routes = await fs.readdir(path.join(__dirname, config_json.docs, 'routes'));
+        const schemas = await fs.readdir(path.join(__currentWorkingDir, config_json.docs, 'schemas'));
+        const routes = await fs.readdir(path.join(__currentWorkingDir, config_json.docs, 'routes'));
 
         for (const filename of schemas) {
             if (!filename.includes(".json")) continue;
-            const file = await fs.readFile(path.join(__dirname, config_json.docs, 'schemas', filename), 'utf-8');
+            const file = await fs.readFile(path.join(__currentWorkingDir, config_json.docs, 'schemas', filename), 'utf-8');
             const json = JSON.parse(file);
             swagger_json.components.schemas = { ...swagger_json.components.schemas, ...json }
         }
 
         for (const filename of routes) {
             if (!filename.includes(".json")) continue;
-            const file = await fs.readFile(path.join(__dirname, config_json.docs, 'routes', filename), 'utf-8');
+            const file = await fs.readFile(path.join(__currentWorkingDir, config_json.docs, 'routes', filename), 'utf-8');
             const json = JSON.parse(file);
             swagger_json.paths = { ...swagger_json.paths, ...json }
         }
 
         // Generate swagger.json file
-        await fs.writeFile(path.join(__dirname, 'swagger.json'), JSON.stringify(swagger_json), 'utf-8');
+        await fs.writeFile(path.join(__currentWorkingDir, 'swagger.json'), JSON.stringify(swagger_json), 'utf-8');
     } catch (e) {
         console.error(chalk.red(e))
     }
@@ -192,14 +192,14 @@ export async function generateSwagmeRouteFiles(docsFolder: string, swaggerRoutes
 
 
 
-export async function updateGitignore(shouldGitignore: boolean, __dirname: string, configDocsFolder: string) {
+export async function updateGitignore(shouldGitignore: boolean, __currentWorkingDir: string, configDocsFolder: string) {
     // Update .gitignore if necessary
     try {
-        const gitignore = await fs.readFile(path.join(__dirname, '.gitignore'), 'utf-8');
+        const gitignore = await fs.readFile(path.join(__currentWorkingDir, '.gitignore'), 'utf-8');
         const filesHaveNotBeenIgnored = !(gitignore.includes(configDocsFolder) && gitignore.includes(CONSTANTS.config_file));
         if (filesHaveNotBeenIgnored && shouldGitignore) {
             const additions = `\n\n# Ignore Swagme Files\n/docs\n${CONSTANTS.config_file}\n`;
-            await fs.appendFile(path.join(__dirname, '.gitignore'), additions, 'utf-8');
+            await fs.appendFile(path.join(__currentWorkingDir, '.gitignore'), additions, 'utf-8');
         }
     } catch (e) {
         if (e instanceof Error) {
