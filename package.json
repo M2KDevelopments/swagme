@@ -25,7 +25,7 @@
   },
   "files": [
     "/dist/database/*",
-    "/dist/helpers*",
+    "/dist/helpers/*",
     "/dist/interfaces/*",
     "/dist/index.js"
   ],
