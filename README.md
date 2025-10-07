@@ -10,7 +10,7 @@ Node Js CLI tool that auto generates swagger api documentation for express web a
 
 
 ## How to Use
-This is will create <b>swag.config.json</b>, <b>swagger.json</b> and <b>swagger.yml</b> base on your project.
+This is will create <b>swag.config.json</b>, <b>swagger.json</b> and <b>swagger.yml</b> based on your project.
 ```bash
 npx swagme
 ```
