@@ -184,14 +184,21 @@ npx swagme del [options]
 
 **Options:**
 - `-p, --dir` - Project directory/folder (default: current directory)
+- `-y, --auto` - Auto delete all swagme files and folders without confirmation prompt (default: false)
 
 **Examples:**
 ```bash
-# Delete swagme files from current directory
+# Delete swagme files from current directory (with confirmation prompt)
 npx swagme del
+
+# Auto-delete without confirmation prompt
+npx swagme del -y
 
 # Delete from specific directory
 npx swagme del -p /path/to/project
+
+# Auto-delete from specific directory without prompt
+npx swagme del -p /path/to/project -y
 ```
 
 ---

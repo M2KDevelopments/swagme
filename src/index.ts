@@ -255,7 +255,7 @@ program.command('config')
     .description('Generates swagme configuration files and folders')
     .option('-y, --auto', 'Auto configure and build swagger documentation', false)
     .option('-p, --dir', 'Project director/folder', process.cwd())
-    .action((_, options) => {
+    .action((options) => {
         const congigure = true;
         const askForDetails = !options.auto
         const build = false;
@@ -277,7 +277,7 @@ program.command('build')
     .option('-r, --routes', 'Update routes', true)
     .option('-s, --schemas', 'Update schemas', true)
     .option('--scan', 'Scan Project files', false)
-    .action((_, options) => {
+    .action((options) => {
         const congigure = false, askForDetails = false, build = true;
         // build files
         const json = !options.json && !options.yaml || options.json;
@@ -294,8 +294,53 @@ program.command('build')
 program.command('del')
     .description('Removes all the swagme configuration files and folders')
     .option('-p, --dir', 'Project director/folder', process.cwd())
-    .action((_, options) => {
-        console.log('Delete Command');
+    .option('-y, --auto', 'Auto delete all swagme files and folders', false)
+    .action(async (options) => {
+        const __currentWorkingDir = options.dir;
+
+        // Read package.json 
+        const config_json = await readConfigJSON(__currentWorkingDir);
+        if (!(config_json && config_json.name)) return console.error(chalk.redBright('Could not find config file'), chalk.red(CONSTANTS.config_file))
+
+        let doit = !options.auto
+        if (!options.auto) {
+            const question = [
+                {
+                    "type": "list",
+                    "name": "confirm",
+                    "message": "Are you sure you want to delete swagme files and folders?",
+                    "choices": ['yes', 'no'],
+                    "default": "no"
+                }
+            ] as Array<any>;
+            const response = (await inquirer.prompt(question)) as { confirm: string }
+            doit = response.confirm == 'yes'
+        }
+
+        if (doit) {
+
+            // Remove docs folder 
+            const docsFolder = path.join(__currentWorkingDir, config_json.docs);
+            try {
+                await fs.rm(docsFolder, { recursive: true, force: true })
+                console.log(chalk.green(docsFolder), 'has been removed')
+            } catch (e: any) {
+                console.error(chalk.red(e.message));
+                console.warn(chalk.yellow('Could not find swagme folder:'), docsFolder)
+            }
+
+
+            // Remove config file
+            const configPath = path.join(__currentWorkingDir, CONSTANTS.config_file);
+            try {
+                await fs.unlink(configPath)
+                console.log(chalk.green(CONSTANTS.config_file), 'has been removed')
+            } catch (e) {
+                console.warn(chalk.yellow('Could not find config file:'), configPath)
+            }
+
+            console.log(chalk.greenBright(config_json.name + ` (${config_json.version})`), chalk.blue('has been De-Swagged!'))
+        }
     });
 
 // Show Title
