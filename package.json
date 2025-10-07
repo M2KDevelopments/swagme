@@ -24,10 +24,7 @@
     "url": "git+https://github.com/M2KDevelopments/swagme.git"
   },
   "files": [
-    "/dist/database/*",
-    "/dist/helpers/*",
-    "/dist/interfaces/*",
-    "/dist/index.js"
+    "dist"
   ],
   "keywords": [
     "swagme",
