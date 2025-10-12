@@ -73,9 +73,9 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
 
     // Mongoose Dependency Check
     if (!package_json.dependencies.mongoose && answersProject.database == 'mongoose') {
-        return console.error(
+        console.error(
             chalk.yellow('Could not find "mongoose" in your project\'s package.json file. Run:'),
-            chalk.green('npm install mongoose')
+            chalk.yellowBright('npm install mongoose')
         )
     }
 

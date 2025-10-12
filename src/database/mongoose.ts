@@ -2,7 +2,7 @@ import { ISwagmeSchema } from "../interfaces/swagme.schema";
 
 export function getMongooseSchemaFromFile(filename: string, file: string) {
     const swaggerSchemas = [] as Array<ISwagmeSchema>;
-    if (file.indexOf('.Schema(') != -1) {
+    if (file.includes('.Schema(')) {
 
         // counters for '{' and  '}'
         let countOpenBrace = 0;
