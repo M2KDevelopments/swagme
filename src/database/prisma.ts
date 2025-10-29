@@ -1,6 +1,6 @@
 import { ISwagmeSchema } from "../interfaces/swagme.schema";
 
-export function getPrimsaSchemaFromFile(filename: string, file: string) {
+export function getPrismaSchemaFromFile(filename: string, file: string) {
     const swaggerSchemas = [] as Array<ISwagmeSchema>;
     const fullschema = file.replace(/\/\/.*|(?=\/\*)(.*)(\*\/)/gmi, '').trim();
     const list = fullschema.split("model").filter(s => s.trim());

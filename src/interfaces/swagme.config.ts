@@ -5,7 +5,7 @@ export interface ISwaggerConfig {
     authorization: 'bearer' | 'basic' | 'none' | undefined,
     baseurl: string,
     main: string,
-    database: string,
+    database: 'mongoose' | 'prisma' | 'drizzle' | 'unknown',
     schema: string,
     routes: string,
     docs: string,

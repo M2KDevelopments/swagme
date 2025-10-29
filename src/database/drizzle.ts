@@ -6,11 +6,11 @@ export function getDrizzleSchemaFromFile(filename: string, file: string) {
   // Remove comments
   const cleanFile = file.replace(/\/\/.*|\/\*[\s\S]*?\*\//g, "").trim();
 
-  // Look for pgTable definitions
-  const pgTableRegex = /pgTable\(\s*["'](\w+)["']\s*,\s*\{([\s\S]*?)\}\s*\)/g;
+  // Look for pgTable, mysqlTable,sqliteTable and singlestoreTable  definitions
+  const tableRegex = /(pgTable|mysqlTable|sqliteTable|singlestoreTable)\(\s*["'](\w+)["']\s*,\s*\{([\s\S]*?)\}\s*\)/g;
 
   let match: RegExpExecArray | null;
-  while ((match = pgTableRegex.exec(cleanFile)) !== null) {
+  while ((match = tableRegex.exec(cleanFile)) !== null) {
     const tableName = match[1];
     const fieldsBlock = match[2];
 

@@ -6,13 +6,13 @@ import inquirer from "inquirer";
 import path from 'path';
 import fs from 'fs/promises';
 import { generateSwaggerFiles, createDocsFolder, generateSwagmeRouteFiles, generateSwagmeSchemaFiles, updateGitignore } from './helpers/creatingfiles';
-import { readPackageJSON, readConfigJSON, detectMainExpressFile } from './helpers/readingfiles';
+import { readPackageJSON, readConfigJSON, detectMainExpressFile, detectORM, getSchemaPathFromConfigFile } from './helpers/readingfiles';
 import { CONSTANTS } from './helpers/constants';
 import { getFilePathPrompts, getProjectPrompts } from './helpers/prompts';
 import { ISwagmeSchema } from './interfaces/swagme.schema';
 import { ISwagmeRoute } from './interfaces/swagme.route';
 import { getMongooseSchemaFromFile } from './database/mongoose';
-import { getPrimsaSchemaFromFile } from './database/primsa';
+import { getPrismaSchemaFromFile as getPrismaSchemaFromFile } from './database/prisma';
 import { getDrizzleSchemaFromFile } from './database/drizzle';
 import { getSwaggerInfoFromExpressRoutes } from './helpers/readendpoints';
 import { generateREADME } from './helpers/readme';
@@ -52,16 +52,23 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
         )
     }
 
+    // Detect ORM, prisma, drizzle or NONE
+    const orm = await detectORM(__currentWorkingDir)
+
+
     // Auto scan for main file with 'app.use('/')' phrase
     const mainRouteFile = await detectMainExpressFile(__currentWorkingDir);
 
     // Check for config file data
     if (config_json && config_json.name) console.log('Swagme config file detected', chalk.green(CONSTANTS.config_file));
+    else if (orm) console.log(chalk.yellow(`ORM Detected:`), chalk.yellowBright(orm));
 
 
+    // Get schema path
+    const schemaDefaultPath = orm ? await getSchemaPathFromConfigFile(__currentWorkingDir, orm) : '';
 
     // Get Project answers
-    const prompts = getProjectPrompts(mainRouteFile, config_json, package_json);
+    const prompts = getProjectPrompts(mainRouteFile, config_json, package_json, schemaDefaultPath, orm);
     const answersProject = !askForDetails ? config_json : (await inquirer.prompt(prompts)) as ISwaggerConfig;
 
 
@@ -90,8 +97,7 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
         const schemaFiles = [];
         const routesFiles = [];
 
-
-        if (answersProject.schema) {
+        if (answersProject.database == 'mongoose' && answersProject.schema) {
             try {
                 const list = await fs.readdir(path.join(__currentWorkingDir, answersProject.schema));
                 schemaFiles.push(...list);
@@ -101,10 +107,9 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
                     chalk.redBright(path.join(__currentWorkingDir, answersProject.schema))
                 );
             }
+        } else if ((answersProject.database == 'prisma' || answersProject.database == 'drizzle') && answersProject.schema) {
+            schemaFiles.push(answersProject.schema);
         }
-
-
-
 
         // Get Route Files List
         try {
@@ -144,10 +149,10 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
                         swaggerSchemas.push(...schemas);
                     }
                     break;
-                case "primsa":
+                case "prisma":
                     for (const filename of list) {
                         const file = await fs.readFile(path.join(__currentWorkingDir, foldername, filename), 'utf8')
-                        const schemas = getPrimsaSchemaFromFile(filename, file);
+                        const schemas = getPrismaSchemaFromFile(filename, file);
                         swaggerSchemas.push(...schemas);
                     }
                     break;

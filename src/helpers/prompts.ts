@@ -1,7 +1,7 @@
 import { IPackageJSON } from "../interfaces/package.json";
 import { ISwaggerConfig } from "../interfaces/swagme.config";
 
-export function getProjectPrompts(mainRouteFile: string, config_json: ISwaggerConfig | any, package_json: IPackageJSON) {
+export function getProjectPrompts(mainRouteFile: string, config_json: ISwaggerConfig | any, package_json: IPackageJSON, schemaDefaultPath: string, orm: string) {
     return [
         {
             "type": "input",
@@ -47,6 +47,7 @@ export function getProjectPrompts(mainRouteFile: string, config_json: ISwaggerCo
             "type": "list",
             "name": "database",
             "message": "Choose Database, ODM or ORM:",
+            "default": orm || "",
             "choices": [
                 "mongoose",
                 "prisma",
@@ -57,7 +58,7 @@ export function getProjectPrompts(mainRouteFile: string, config_json: ISwaggerCo
             "type": "input",
             "name": "schema",
             "message": "Where is a folder for your schemas or models? (To ignore models/schema leave it blank)",
-            "default": config_json.schema || "/models",
+            "default": config_json.schema || schemaDefaultPath || "/models",
         },
         {
             "type": "input",
