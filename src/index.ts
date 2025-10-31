@@ -1,23 +1,35 @@
 #!/usr/bin/env node
+
+// CLI Libraries
 import figlet from 'figlet';
 import chalk from 'chalk';
 import { program } from "commander";
 import inquirer from "inquirer";
+import { getFilePathPrompts, getProjectPrompts } from './helpers/prompts';
+import { CONSTANTS } from './helpers/constants';
+
+// Node Libs for paths and files
 import path from 'path';
 import fs from 'fs/promises';
+
+
 import { generateSwaggerFiles, createDocsFolder, generateSwagmeRouteFiles, generateSwagmeSchemaFiles, updateGitignore } from './helpers/creatingfiles';
+import { generateREADME } from './helpers/readme';
+
+// Reading config files
 import { readPackageJSON, readConfigJSON, detectMainExpressFile, detectORM, getSchemaPathFromConfigFile } from './helpers/readingfiles';
-import { CONSTANTS } from './helpers/constants';
-import { getFilePathPrompts, getProjectPrompts } from './helpers/prompts';
-import { ISwagmeSchema } from './interfaces/swagme.schema';
-import { ISwagmeRoute } from './interfaces/swagme.route';
+
+// Reading Schema Files and Endpoints
 import { getMongooseSchemaFromFile } from './database/mongoose';
 import { getPrismaSchemaFromFile as getPrismaSchemaFromFile } from './database/prisma';
 import { getDrizzleSchemaFromFile } from './database/drizzle';
 import { getSwaggerInfoFromExpressRoutes } from './helpers/readendpoints';
-import { generateREADME } from './helpers/readme';
-import { ISwaggerConfig } from './interfaces/swagme.config';
 
+
+// Interfaces 
+import { ISwagmeSchema } from './interfaces/swagme.schema';
+import { ISwagmeRoute } from './interfaces/swagme.route';
+import { ISwaggerConfig } from './interfaces/swagme.config';
 interface BuildOptions {
     json: boolean,
     yaml: boolean,
@@ -137,7 +149,23 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
                 }
             }
         } else if (answersProject.database == 'drizzle' && answersProject.schema) {
-            schemaFiles.push(answersProject.schema);
+            if (answersProject.schema.includes("*")) { //includes a wildcard
+                const folder = answersProject.schema.substring(0, answersProject.schema.indexOf("*"));
+                try {
+                    const list = await fs.readdir(path.join(__currentWorkingDir, folder));
+                    schemaFiles.push(...list
+                        .filter(file => file.endsWith('.ts') || file.endsWith('.js'))
+                        .map(file => `${folder}/${file}`)
+                    );
+                } catch (e) {
+                    return console.error(
+                        chalk.red('Schema folder was not found:'),
+                        chalk.redBright(path.join(__currentWorkingDir, answersProject.schema))
+                    );
+                }
+            } else if (answersProject.schema.endsWith(".ts") || answersProject.schema.endsWith(".js")) {
+                schemaFiles.push(answersProject.schema);
+            }
         }
 
         // Get Route Files List
