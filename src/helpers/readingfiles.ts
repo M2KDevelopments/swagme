@@ -7,6 +7,7 @@ import { CONSTANTS } from './constants';
 
 export async function readPackageJSON(__currentWorkingDir: string): Promise<{ json: IPackageJSON | null, error: string | null | any }> {
     try {
+ 
         const package_json = await fs.readFile(path.join(__currentWorkingDir, 'package.json'), 'utf8');
         return { json: JSON.parse(package_json) as IPackageJSON, error: null }
     } catch (e) {
@@ -115,6 +116,23 @@ export async function detectORM(__currentWorkingDir: string): Promise<"prisma" |
 }
 
 
+
+export async function detectProjectType(__currentWorkingDir: string, packagejson: IPackageJSON): Promise<"nextjs" | "express" | null> {
+    try {
+        await fs.lstat(path.join(__currentWorkingDir, 'next.config.mjs'));
+        return 'nextjs';
+    } catch (e) { }
+    try {
+        await fs.lstat(path.join(__currentWorkingDir, 'next.config.js'));
+        return 'nextjs';
+    } catch (e) { }
+    try {
+        await fs.lstat(path.join(__currentWorkingDir, 'next.config.ts'));
+        return 'nextjs';
+    } catch (e) { }
+    if (packagejson.dependencies.express) return "express";
+    return null;
+}
 
 export function getSwaggerYAMLFrom(filetext: string) {
     let start = 0;

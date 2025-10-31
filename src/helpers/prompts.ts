@@ -40,7 +40,7 @@ export function getProjectPrompts(mainRouteFile: string, config_json: ISwaggerCo
         {
             "type": "input",
             "name": "main",
-            "message": "Path where you've defined your express app. e.g 'const app = express();' ",
+            "message": "Path where you've defined your express app. e.g 'const app = express();' or api folder/directory for Next JS",
             "default": config_json.main || mainRouteFile,
         },
         {

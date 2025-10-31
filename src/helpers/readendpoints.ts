@@ -3,13 +3,12 @@ import fs from 'fs/promises';
 import path from 'path';
 
 
-export async function getSwaggerInfoFromExpressRoutes(__currentWorkingDir: string, routeAnswer: string, mainFileAnswer: string, routesFileNames: Array<string>) {
-
+export async function getSwaggerInfoFromExpressRoutes(__currentWorkingDir: string, props: { routeAnswer: string, mainFilePath: string, routesFileNames: Array<string> }) {
+    const { routeAnswer, mainFilePath, routesFileNames } = props;
     const swaggerRoutes = [] as Array<ISwagmeRoute>;
     if (!routesFileNames.length) return swaggerRoutes;
 
-    
-    const mainFile = await fs.readFile(path.join(__currentWorkingDir, mainFileAnswer), 'utf8')
+    const mainFile = await fs.readFile(path.join(__currentWorkingDir, mainFilePath), 'utf8')
 
 
     const baseRouteMap = new Map<string, string>(); // <file:string, baseroute:string>
@@ -129,4 +128,52 @@ export async function getSwaggerInfoFromExpressRoutes(__currentWorkingDir: strin
 
     }
     return swaggerRoutes;
+}
+
+
+/**
+ * Recursive function to get all the files in the nextjs api folder to generate routes
+ * @param __currentWorkingDir 
+ * @param basefolder 
+ * @param folder 
+ * @returns 
+ */
+async function getNextJSFiles(__currentWorkingDir: string, basefolder: string, folder: string = "") {
+    const files: string[] = [];
+    try {
+        const list = await fs.readdir(path.join(__currentWorkingDir, basefolder, folder));
+        for (const fileOrFolder of list) {
+            if (fileOrFolder.endsWith(".js") || fileOrFolder.endsWith(".ts")) {
+                files.push(path.join(basefolder, folder, fileOrFolder))
+            } else { // could be folder
+                const file = await fs.stat(path.join(__currentWorkingDir, basefolder, folder, fileOrFolder))
+                if (file.isDirectory()) {
+                    const newbaseFolder = path.join(basefolder, folder);
+                    const innerFolder = fileOrFolder;
+                    const innerlist = await getNextJSFiles(__currentWorkingDir, newbaseFolder, innerFolder)
+                    files.push(...innerlist);
+                }
+            }
+        }
+        return files;
+    } catch (e) {
+        console.error(e);
+        return files;
+    }
+}
+
+export async function getSwaggerInfoFromNextJSRouter(__currentWorkingDir: string, mainFolder: string): Promise<ISwagmeRoute[]> {
+    const files = await getNextJSFiles(__currentWorkingDir, mainFolder);
+    const tagMap = new Map<string, ISwagmeRoute[]>()
+    for (const file of files) {
+        const tagname = file.replace(path.join(mainFolder), '').replace(/(\/|\\).*/, '').replace(".js", '').replace(".ts", '');
+        const content = await fs.readFile(path.join(__currentWorkingDir, file), 'utf-8');
+        if (!tagMap.get(tagname)) tagMap.set(tagname, []);
+        else {
+
+        }
+        
+    }
+
+    return [];
 }

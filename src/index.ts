@@ -17,13 +17,13 @@ import { generateSwaggerFiles, createDocsFolder, generateSwagmeRouteFiles, gener
 import { generateREADME } from './helpers/readme';
 
 // Reading config files
-import { readPackageJSON, readConfigJSON, detectMainExpressFile, detectORM, getSchemaPathFromConfigFile } from './helpers/readingfiles';
+import { readPackageJSON, readConfigJSON, detectMainExpressFile, detectORM, getSchemaPathFromConfigFile, detectProjectType } from './helpers/readingfiles';
 
 // Reading Schema Files and Endpoints
 import { getMongooseSchemaFromFile } from './database/mongoose';
 import { getPrismaSchemaFromFile as getPrismaSchemaFromFile } from './database/prisma';
 import { getDrizzleSchemaFromFile } from './database/drizzle';
-import { getSwaggerInfoFromExpressRoutes } from './helpers/readendpoints';
+import { getSwaggerInfoFromExpressRoutes, getSwaggerInfoFromNextJSRouter } from './helpers/readendpoints';
 
 
 // Interfaces 
@@ -38,6 +38,7 @@ interface BuildOptions {
     scanProjectFiles: boolean
 }
 
+
 async function run(congigure: boolean, askForDetails: boolean, build: boolean, pathdir: string, buildOptions: BuildOptions) {
 
     const __currentWorkingDir = pathdir || process.cwd()
@@ -48,13 +49,11 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
     if (error) return console.error(chalk.redBright(error));
 
     // Express dependency
-    if (!package_json || !package_json.dependencies || !package_json.dependencies.express) {
-        return console.error(
-            chalk.yellow('express'),
-            chalk.redBright('dependency not found. Run:'),
-            chalk.yellow('npm install express')
-        );
+    if (!package_json || !package_json.dependencies) {
+        return console.error(chalk.redBright('Dependencies not found'));
     }
+
+    const projectType = await detectProjectType(__currentWorkingDir, package_json);
 
     // Swagger Dependency Check
     if (!package_json.dependencies || !package_json.dependencies['swagger-ui-express']) {
@@ -68,12 +67,22 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
     const orm = await detectORM(__currentWorkingDir)
 
 
-    // Auto scan for main file with 'app.use('/')' phrase
-    const mainRouteFile = await detectMainExpressFile(__currentWorkingDir);
+    let mainRouteFile: string = '';
+    switch (projectType) {
+        case "express":
+            // Auto scan for main file with 'app.use('/')' phrase
+            mainRouteFile = await detectMainExpressFile(__currentWorkingDir);
+            break;
+        case "nextjs":
+            mainRouteFile = '/pages/api'
+            break;
+    }
+
 
     // Check for config file data
     if (config_json && config_json.name) console.log('Swagme config file detected', chalk.green(CONSTANTS.config_file));
     else if (orm) console.log(chalk.yellow(`ORM Detected:`), chalk.yellowBright(orm));
+
 
 
     // Get schema path
@@ -227,9 +236,16 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
 
 
         // reads routes from files
-        const swaggerRoutes: Array<ISwagmeRoute> = buildOptions.scanProjectFiles && buildOptions.routes ? await getSwaggerInfoFromExpressRoutes(__currentWorkingDir, answersProject.routes, answersProject.main, routesFiles) : [];
-
-
+        let swaggerRoutes: Array<ISwagmeRoute> = []
+        if (projectType == 'express') {
+            swaggerRoutes = buildOptions.scanProjectFiles && buildOptions.routes ? await getSwaggerInfoFromExpressRoutes(__currentWorkingDir, {
+                mainFilePath: answersProject.routes,
+                routeAnswer: answersProject.main,
+                routesFileNames: routesFiles,
+            }) : [];
+        } else if (projectType == 'nextjs') {
+            swaggerRoutes = await getSwaggerInfoFromNextJSRouter(__currentWorkingDir, answersProject.routes);
+        }
 
 
         /* *******************************************
