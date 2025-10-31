@@ -16,6 +16,11 @@ This will interactively create **swag.config.json**, **swagger.json** and **swag
 npx swagme
 ```
 
+## For Usage Instructions
+```bash
+npx swagme --help
+```
+
 ---
 
 ## Installation

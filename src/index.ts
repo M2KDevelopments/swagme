@@ -107,7 +107,36 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
                     chalk.redBright(path.join(__currentWorkingDir, answersProject.schema))
                 );
             }
-        } else if ((answersProject.database == 'prisma' || answersProject.database == 'drizzle') && answersProject.schema) {
+        } else if (answersProject.database == 'prisma' && answersProject.schema) {
+            if (answersProject.schema.endsWith('.prisma')) { // if it a files
+                schemaFiles.push(answersProject.schema);
+            } else { // show be a folder
+                try {
+                    const list = await fs.readdir(path.join(__currentWorkingDir, answersProject.schema));
+                    for (const fileOrFolder of list) {
+
+                        // ignore migrations folders
+                        if (fileOrFolder == 'migrations') continue;
+
+                        // has the '.prisma' file extension
+                        else if (fileOrFolder.endsWith('.prisma')) schemaFiles.push(fileOrFolder);
+
+                        // no file extension. assume folder/directory
+                        else if (!fileOrFolder.includes(".")) {
+                            const innerfiles = await fs.readdir(path.join(__currentWorkingDir, answersProject.schema, fileOrFolder));
+                            for (const file of innerfiles) {
+                                if (file.endsWith('.prisma')) schemaFiles.push(`${fileOrFolder}/${file}`);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    return console.error(
+                        chalk.red('Schema folder was not found:'),
+                        chalk.redBright(path.join(__currentWorkingDir, answersProject.schema))
+                    );
+                }
+            }
+        } else if (answersProject.database == 'drizzle' && answersProject.schema) {
             schemaFiles.push(answersProject.schema);
         }
 
