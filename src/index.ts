@@ -5,7 +5,7 @@ import figlet from 'figlet';
 import chalk from 'chalk';
 import { program } from "commander";
 import inquirer from "inquirer";
-import { getFilePathPrompts, getProjectPrompts } from './helpers/prompts';
+import { getProjectPrompts } from './helpers/prompts';
 import { CONSTANTS } from './helpers/constants';
 
 // Node Libs for paths and files
@@ -48,12 +48,16 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
     const config_json = await readConfigJSON(__currentWorkingDir);
     if (error) return console.error(chalk.redBright(error));
 
-    // Express dependency
-    if (!package_json || !package_json.dependencies) {
-        return console.error(chalk.redBright('Dependencies not found'));
-    }
+    // Dependency Check
+    if (!package_json || !package_json.dependencies) return console.error(chalk.redBright('Dependencies not found'));
 
+    // Get Project Type
     const projectType = await detectProjectType(__currentWorkingDir, package_json);
+
+    // Lib Dependency Check
+    if (projectType == 'express' && !package_json.dependencies.express) console.error(chalk.yellowBright('Express JS Dependency not found'), chalk.yellow(`run: 'npm i express'`));
+    else if (projectType == 'nextjs' && !package_json.dependencies.next) console.error(chalk.yellowBright('Next JS Dependency not found'));
+
 
     // Swagger Dependency Check
     if (!package_json.dependencies || !package_json.dependencies['swagger-ui-express']) {
@@ -89,7 +93,7 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
     const schemaDefaultPath = orm ? await getSchemaPathFromConfigFile(__currentWorkingDir, orm) : '';
 
     // Get Project answers
-    const prompts = getProjectPrompts(mainRouteFile, config_json, package_json, schemaDefaultPath, orm);
+    const prompts = getProjectPrompts({ mainRouteFile, config_json, package_json, schemaDefaultPath, orm, projectType });
     const answersProject = !askForDetails ? config_json : (await inquirer.prompt(prompts)) as ISwaggerConfig;
 
 
@@ -189,23 +193,10 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
         }
 
 
-
-        // Routes and Schema files
-        const promptFileAndFolders = getFilePathPrompts(schemaFiles, routesFiles);
-
-
-
-
-        // Get answers for files
-        const answersForFiles = !askForDetails ? { routefiles: ['SELECT ALL'], schemafiles: ['SELECT ALL'] } : await inquirer.prompt(promptFileAndFolders) as { routefiles: Array<string>, schemafiles: Array<string> };
-
-
-
-
         // read schemas and models
         const swaggerSchemas = [] as Array<ISwagmeSchema>;
         if (schemaFiles.length && buildOptions.schemas && buildOptions.scanProjectFiles) {
-            const list = answersForFiles.schemafiles.includes("SELECT ALL") ? schemaFiles : answersForFiles.schemafiles
+            const list = schemaFiles
             const foldername = answersProject.schema;
             switch (answersProject.database) {
                 case "mongoose":
@@ -239,12 +230,13 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
         let swaggerRoutes: Array<ISwagmeRoute> = []
         if (projectType == 'express') {
             swaggerRoutes = buildOptions.scanProjectFiles && buildOptions.routes ? await getSwaggerInfoFromExpressRoutes(__currentWorkingDir, {
-                mainFilePath: answersProject.routes,
-                routeAnswer: answersProject.main,
+                mainFilePath: answersProject.main,
+                routeFolder: answersProject.routes,
                 routesFileNames: routesFiles,
             }) : [];
         } else if (projectType == 'nextjs') {
-            swaggerRoutes = await getSwaggerInfoFromNextJSRouter(__currentWorkingDir, answersProject.routes);
+            swaggerRoutes = buildOptions.scanProjectFiles && buildOptions.routes ? await getSwaggerInfoFromNextJSRouter(__currentWorkingDir, answersProject.routes)
+                : [];
         }
 
 

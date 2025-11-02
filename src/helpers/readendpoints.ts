@@ -3,8 +3,8 @@ import fs from 'fs/promises';
 import path from 'path';
 
 
-export async function getSwaggerInfoFromExpressRoutes(__currentWorkingDir: string, props: { routeAnswer: string, mainFilePath: string, routesFileNames: Array<string> }) {
-    const { routeAnswer, mainFilePath, routesFileNames } = props;
+export async function getSwaggerInfoFromExpressRoutes(__currentWorkingDir: string, props: { routeFolder: string, mainFilePath: string, routesFileNames: Array<string> }) {
+    const { routeFolder, mainFilePath, routesFileNames } = props;
     const swaggerRoutes = [] as Array<ISwagmeRoute>;
     if (!routesFileNames.length) return swaggerRoutes;
 
@@ -21,11 +21,11 @@ export async function getSwaggerInfoFromExpressRoutes(__currentWorkingDir: strin
         // e.g const routes = require('./api/routes/user')
         // e.g import routes from './api/routes/user';
         // e.g app.use('/users', require(''./api/routes/user''));
-        if (line.includes(`${routeAnswer}/`)) {
+        if (line.includes(`${routeFolder}/`)) {
             if (line.includes(".use(")) {
                 if (line.includes('require')) {
                     const baseRouteMatch = line.match(/(?<=\/).*(?=\W,)/);
-                    const filenameMatch = line.match(new RegExp(`(?<=${routeAnswer}).*(?=("|'))`));
+                    const filenameMatch = line.match(new RegExp(`(?<=${routeFolder}).*(?=("|'))`));
                     const baseroute = baseRouteMatch ? `/${baseRouteMatch[0]}` : "";
                     const filename = filenameMatch ? filenameMatch[0].replace("/", "") : "";
                     baseRouteMap.set(filename.replace(".js", "").replace(".ts", ""), baseroute)
@@ -40,7 +40,7 @@ export async function getSwaggerInfoFromExpressRoutes(__currentWorkingDir: strin
                 }
             } else if (line.includes("import ")) {
                 const routeVariableName = line.split("from")[0].replace("import", "").trim();
-                const filenameMatch = line.match(new RegExp(`(?<=${routeAnswer}).*(?=("|'))`));
+                const filenameMatch = line.match(new RegExp(`(?<=${routeFolder}).*(?=("|'))`));
                 const filename = filenameMatch ? filenameMatch[0].replace("/", "") : "";
                 variableNameList.push({ variable: routeVariableName, filename })
             } else if ((line.includes("const ") || line.includes("let ") || line.includes("var ")) && line.includes("require")) {
@@ -51,7 +51,7 @@ export async function getSwaggerInfoFromExpressRoutes(__currentWorkingDir: strin
                     .replace("var", "")
                     .replace("=", "")
                     .trim();
-                const filenameMatch = line.match(new RegExp(`(?<=${routeAnswer}).*(?=("|'))`));
+                const filenameMatch = line.match(new RegExp(`(?<=${routeFolder}).*(?=("|'))`));
                 const filename = filenameMatch ? filenameMatch[0].replace("/", "") : "";
                 variableNameList.push({ variable: routeVariableName, filename })
             }
@@ -66,7 +66,7 @@ export async function getSwaggerInfoFromExpressRoutes(__currentWorkingDir: strin
     for (const f of routesFileNames) {
 
         // Read Route file
-        const file = await fs.readFile(path.join(__currentWorkingDir, routeAnswer, f), 'utf8')
+        const file = await fs.readFile(path.join(__currentWorkingDir, routeFolder, f), 'utf8')
 
         // Define variable to store route info
         const routes = [] as Array<{ method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS', path: string }>;
@@ -165,6 +165,7 @@ async function getNextJSFiles(__currentWorkingDir: string, basefolder: string, f
 export async function getSwaggerInfoFromNextJSRouter(__currentWorkingDir: string, mainFolder: string): Promise<ISwagmeRoute[]> {
     const files = await getNextJSFiles(__currentWorkingDir, mainFolder);
     const tagMap = new Map<string, ISwagmeRoute>()
+    
     for (const file of files) {
         const tagname = file
             .replace(path.join(mainFolder), '') // remove the main page path to api folder for nextjs
@@ -184,6 +185,7 @@ export async function getSwaggerInfoFromNextJSRouter(__currentWorkingDir: string
                 break;
             }
         }
+
         if (content.includes("export default") && hasResponseFunction) {
 
             const routepath = file
