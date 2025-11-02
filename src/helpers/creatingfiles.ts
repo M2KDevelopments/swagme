@@ -204,7 +204,7 @@ export async function generateSwagmeRouteFiles(docsFolder: string, swaggerRoutes
 
     for (const { baseroute, filename, routes, tagname } of swaggerRoutes) {
 
-        console.log('Added:', chalk.greenBright(baseroute));
+        console.log('Resource Added:', chalk.greenBright(tagname));
 
         // Configure swagger endpoints
         const endpoints = {} as any;

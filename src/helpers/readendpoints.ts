@@ -69,7 +69,7 @@ export async function getSwaggerInfoFromExpressRoutes(__currentWorkingDir: strin
         const file = await fs.readFile(path.join(__currentWorkingDir, routeAnswer, f), 'utf8')
 
         // Define variable to store route info
-        const routes = [] as Array<{ method: string, path: string }>;
+        const routes = [] as Array<{ method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS', path: string }>;
 
         for (const line of file.split("\n")) {
             // GET REQUEST
@@ -164,16 +164,65 @@ async function getNextJSFiles(__currentWorkingDir: string, basefolder: string, f
 
 export async function getSwaggerInfoFromNextJSRouter(__currentWorkingDir: string, mainFolder: string): Promise<ISwagmeRoute[]> {
     const files = await getNextJSFiles(__currentWorkingDir, mainFolder);
-    const tagMap = new Map<string, ISwagmeRoute[]>()
+    const tagMap = new Map<string, ISwagmeRoute>()
     for (const file of files) {
-        const tagname = file.replace(path.join(mainFolder), '').replace(/(\/|\\).*/, '').replace(".js", '').replace(".ts", '');
+        const tagname = file
+            .replace(path.join(mainFolder), '') // remove the main page path to api folder for nextjs
+            .replace(/^(\/|\\)/, '') // remove the slash if it is at the beginning of the string
+            .replace(/(\/|\\).*/, '') // remove everything after the slash
+            .replace(".js", '') // remove javascript extension
+            .replace(".ts", ''); // remove typescript extension
+
+        if (!tagname) continue;
+
         const content = await fs.readFile(path.join(__currentWorkingDir, file), 'utf-8');
-        if (!tagMap.get(tagname)) tagMap.set(tagname, []);
-        else {
-
+        const responseReturns = ['.json(', '.status(', '.send(', '.end(', '.redirect(']
+        let hasResponseFunction = false;
+        for (const fn of responseReturns) {
+            if (content.includes(fn)) {
+                hasResponseFunction = true;
+                break;
+            }
         }
-        
-    }
+        if (content.includes("export default") && hasResponseFunction) {
 
-    return [];
+            const routepath = file
+                .replace(path.join(mainFolder), '')
+                .replace(/\\/, '/') //change all back slashes to forward slashes
+                .replace(".js", '')
+                .replace(".ts", '');
+
+            const endpoints: ISwagmeRoute = {
+                filename: tagname,
+                tagname: tagname,
+                baseroute: "",
+                routes: [
+                    {
+                        path: routepath,
+                        method: "GET"
+                    },
+                    {
+                        path: routepath,
+                        method: "POST"
+                    },
+                    {
+                        path: routepath,
+                        method: "PUT"
+                    },
+                    {
+                        path: routepath,
+                        method: "PATCH"
+                    },
+                    {
+                        path: routepath,
+                        method: "DELETE"
+                    }
+                ]
+            }
+
+            if (tagMap.get(tagname)) tagMap.get(tagname)?.routes.push(...endpoints.routes)
+            else tagMap.set(tagname, endpoints);
+        }
+    }
+    return Array.from(tagMap.values());
 }
