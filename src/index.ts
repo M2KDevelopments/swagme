@@ -30,6 +30,8 @@ import { getSwaggerInfoFromExpressRoutes, getSwaggerInfoFromNextJSRouter } from 
 import { ISwagmeSchema } from './interfaces/swagme.schema';
 import { ISwagmeRoute } from './interfaces/swagme.route';
 import { ISwaggerConfig } from './interfaces/swagme.config';
+import SwagmePackageJson from '../package.json'
+
 interface BuildOptions {
     json: boolean,
     yaml: boolean,
@@ -94,17 +96,17 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
 
     // Get Project answers
     const prompts = getProjectPrompts({ mainRouteFile, config_json, package_json, schemaDefaultPath, orm, projectType });
-    const answersProject = !askForDetails ? config_json : (await inquirer.prompt(prompts)) as ISwaggerConfig;
+    const answersForProject = !askForDetails ? config_json : (await inquirer.prompt(prompts)) as ISwaggerConfig;
 
 
     // Validation Checks
-    if (!answersProject.name && answersProject.name.trim()) return console.error(chalk.redBright(`Please make sure you enter the name`))
-    if (!answersProject.routes && answersProject.routes.trim()) return console.error(chalk.redBright(`Please make sure you enter the routes folder`))
+    if (!answersForProject.name && answersForProject.name.trim()) return console.error(chalk.redBright(`Please make sure you enter the name`))
+    if (!answersForProject.routes && answersForProject.routes.trim()) return console.error(chalk.redBright(`Please make sure you enter the routes folder`))
 
 
 
     // Mongoose Dependency Check
-    if (!package_json.dependencies.mongoose && answersProject.database == 'mongoose') {
+    if (!package_json.dependencies.mongoose && answersForProject.database == 'mongoose') {
         console.error(
             chalk.yellow('Could not find "mongoose" in your project\'s package.json file. Run:'),
             chalk.yellowBright('npm install mongoose')
@@ -113,7 +115,11 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
 
     // Create Swagger Config Files
     if (congigure) {
-        await fs.writeFile(path.join(__currentWorkingDir, CONSTANTS.config_file), JSON.stringify(answersProject), 'utf-8');
+        await fs.writeFile(
+            path.join(__currentWorkingDir, CONSTANTS.config_file),  // file path
+            JSON.stringify(answersForProject),  // answers of from user
+            'utf-8' //encoding
+        );
     }
 
     if (build) {
@@ -122,22 +128,22 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
         const schemaFiles = [];
         const routesFiles = [];
 
-        if (answersProject.database == 'mongoose' && answersProject.schema) {
+        if (answersForProject.database == 'mongoose' && answersForProject.schema) {
             try {
-                const list = await fs.readdir(path.join(__currentWorkingDir, answersProject.schema));
+                const list = await fs.readdir(path.join(__currentWorkingDir, answersForProject.schema));
                 schemaFiles.push(...list);
             } catch (e) {
                 return console.error(
                     chalk.red('Schema folder was not found:'),
-                    chalk.redBright(path.join(__currentWorkingDir, answersProject.schema))
+                    chalk.redBright(path.join(__currentWorkingDir, answersForProject.schema))
                 );
             }
-        } else if (answersProject.database == 'prisma' && answersProject.schema) {
-            if (answersProject.schema.endsWith('.prisma')) { // if it a files
-                schemaFiles.push(answersProject.schema);
+        } else if (answersForProject.database == 'prisma' && answersForProject.schema) {
+            if (answersForProject.schema.endsWith('.prisma')) { // if it a files
+                schemaFiles.push(answersForProject.schema);
             } else { // show be a folder
                 try {
-                    const list = await fs.readdir(path.join(__currentWorkingDir, answersProject.schema));
+                    const list = await fs.readdir(path.join(__currentWorkingDir, answersForProject.schema));
                     for (const fileOrFolder of list) {
 
                         // ignore migrations folders
@@ -148,7 +154,7 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
 
                         // no file extension. assume folder/directory
                         else if (!fileOrFolder.includes(".")) {
-                            const innerfiles = await fs.readdir(path.join(__currentWorkingDir, answersProject.schema, fileOrFolder));
+                            const innerfiles = await fs.readdir(path.join(__currentWorkingDir, answersForProject.schema, fileOrFolder));
                             for (const file of innerfiles) {
                                 if (file.endsWith('.prisma')) schemaFiles.push(`${fileOrFolder}/${file}`);
                             }
@@ -157,13 +163,13 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
                 } catch (e) {
                     return console.error(
                         chalk.red('Schema folder was not found:'),
-                        chalk.redBright(path.join(__currentWorkingDir, answersProject.schema))
+                        chalk.redBright(path.join(__currentWorkingDir, answersForProject.schema))
                     );
                 }
             }
-        } else if (answersProject.database == 'drizzle' && answersProject.schema) {
-            if (answersProject.schema.includes("*")) { //includes a wildcard
-                const folder = answersProject.schema.substring(0, answersProject.schema.indexOf("*"));
+        } else if (answersForProject.database == 'drizzle' && answersForProject.schema) {
+            if (answersForProject.schema.includes("*")) { //includes a wildcard
+                const folder = answersForProject.schema.substring(0, answersForProject.schema.indexOf("*"));
                 try {
                     const list = await fs.readdir(path.join(__currentWorkingDir, folder));
                     schemaFiles.push(...list
@@ -173,22 +179,22 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
                 } catch (e) {
                     return console.error(
                         chalk.red('Schema folder was not found:'),
-                        chalk.redBright(path.join(__currentWorkingDir, answersProject.schema))
+                        chalk.redBright(path.join(__currentWorkingDir, answersForProject.schema))
                     );
                 }
-            } else if (answersProject.schema.endsWith(".ts") || answersProject.schema.endsWith(".js")) {
-                schemaFiles.push(answersProject.schema);
+            } else if (answersForProject.schema.endsWith(".ts") || answersForProject.schema.endsWith(".js")) {
+                schemaFiles.push(answersForProject.schema);
             }
         }
 
         // Get Route Files List
         try {
-            const list = await fs.readdir(path.join(__currentWorkingDir, answersProject.routes));
+            const list = await fs.readdir(path.join(__currentWorkingDir, answersForProject.routes));
             routesFiles.push(...list);
         } catch (e) {
             return console.error(
                 chalk.red('Routes folder was not found:'),
-                chalk.redBright(path.join(__currentWorkingDir, answersProject.routes))
+                chalk.redBright(path.join(__currentWorkingDir, answersForProject.routes))
             );
         }
 
@@ -197,8 +203,8 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
         const swaggerSchemas = [] as Array<ISwagmeSchema>;
         if (schemaFiles.length && buildOptions.schemas && buildOptions.scanProjectFiles) {
             const list = schemaFiles
-            const foldername = answersProject.schema;
-            switch (answersProject.database) {
+            const foldername = answersForProject.schema;
+            switch (answersForProject.database) {
                 case "mongoose":
                     for (const filename of list) {
                         const file = await fs.readFile(path.join(__currentWorkingDir, foldername, filename), 'utf8')
@@ -230,12 +236,12 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
         let swaggerRoutes: Array<ISwagmeRoute> = []
         if (projectType == 'express') {
             swaggerRoutes = buildOptions.scanProjectFiles && buildOptions.routes ? await getSwaggerInfoFromExpressRoutes(__currentWorkingDir, {
-                mainFilePath: answersProject.main,
-                routeFolder: answersProject.routes,
+                mainFilePath: answersForProject.main,
+                routeFolder: answersForProject.routes,
                 routesFileNames: routesFiles,
             }) : [];
         } else if (projectType == 'nextjs') {
-            swaggerRoutes = buildOptions.scanProjectFiles && buildOptions.routes ? await getSwaggerInfoFromNextJSRouter(__currentWorkingDir, answersProject.routes)
+            swaggerRoutes = buildOptions.scanProjectFiles && buildOptions.routes ? await getSwaggerInfoFromNextJSRouter(__currentWorkingDir, answersForProject.routes)
                 : [];
         }
 
@@ -247,7 +253,7 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
         * *******************************************/
 
         // 1. Create Directories
-        const docsFolder = path.join(__currentWorkingDir, answersProject.docs);
+        const docsFolder = path.join(__currentWorkingDir, answersForProject.docs);
         const { error: docsErr } = await createDocsFolder(docsFolder)
         if (docsErr) return; // Stop Process
 
@@ -258,10 +264,10 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
         if (buildOptions.schemas && buildOptions.scanProjectFiles) await generateSwagmeSchemaFiles(docsFolder, swaggerSchemas);
 
         // 4. Generate route files
-        if (buildOptions.routes && buildOptions.scanProjectFiles) await generateSwagmeRouteFiles(docsFolder, swaggerRoutes, answersProject.authorization);
+        if (buildOptions.routes && buildOptions.scanProjectFiles) await generateSwagmeRouteFiles(docsFolder, swaggerRoutes, answersForProject.authorization);
 
         // 5. Update .gitignore if necessary
-        await updateGitignore(answersProject.gitignore, __currentWorkingDir, answersProject.docs);
+        await updateGitignore(answersForProject.gitignore, __currentWorkingDir, answersForProject.docs);
 
         // 6. Generate Swagger Json and/or Yaml files
         if (config_json && config_json.name && (buildOptions.json || buildOptions.yaml)) {
@@ -272,15 +278,15 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
 
 
     // 7. Done with swagme
-    console.log(chalk.blueBright(`${answersProject.name} (${answersProject.version})`), "has been", chalk.yellowBright('Swagged!'))
+    console.log(chalk.blueBright(`${answersForProject.name} (${answersForProject.version})`), "has been", chalk.yellowBright('Swagged!'))
 
 
 }
 
 // Initialization
 program
-    .version("1.0.0")
-    .description("Node Js CLI tool that auto generates swagger api documentation for express web servers. Takes advantage of the MVC Pattern")
+    .version(SwagmePackageJson.version)
+    .description(SwagmePackageJson.description)
     .action(() => {
         const congigure = true, askForDetails = true, build = true;
         run(congigure, askForDetails, build, process.cwd(), {
@@ -294,7 +300,7 @@ program
 
 // Configure Command
 program.command('run')
-    .description("Node Js CLI tool that auto generates swagger api documentation for express web servers. Takes advantage of the MVC Pattern.")
+    .description(SwagmePackageJson.description)
     .argument('[string]', 'Working direction of the project', process.cwd())
     .option('-y, --auto', 'Auto configure and build swagger documentation', false)
     .option('-c, --config', 'Auto configure swagger documentation', false)

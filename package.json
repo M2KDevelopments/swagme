@@ -1,6 +1,6 @@
 {
   "name": "swagme",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Node Js CLI tool that auto generates swagger api documentation for express and nextjs web servers. Takes advantage of the MVC Pattern",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,7 @@
     "prod": "tsc && node dist/index.js",
     "dev": " ts-node src/index.ts",
     "build": "tsc",
-    "test": "ts-node tests/index.ts"
+    "test": "jest"
   },
   "bin": {
     "swagme": "./dist/index.js"
@@ -50,6 +50,7 @@
   "devDependencies": {
     "@types/json-to-pretty-yaml": "^1.2.1",
     "@types/node": "^24.5.2",
+    "jest": "^30.2.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   }
