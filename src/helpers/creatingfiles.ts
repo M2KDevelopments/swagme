@@ -16,7 +16,6 @@ import YAML from 'json-to-pretty-yaml';
  * @param {boolean} [yaml=true] - Generate swagger.yaml file
  * @returns {Promise<void>} - Resolves when the files have been generated
  */
-
 export async function generateSwaggerFiles(config_json: ISwaggerConfig, __currentWorkingDir: string, json: boolean = true, yaml: boolean = true) {
 
     // config file check
@@ -251,6 +250,7 @@ export async function generateSwagmeRouteFiles(docsFolder: string, swaggerRoutes
                 endpoints[baseroute + path][method.toLowerCase()] = {
                     "summary": "API Documentation",
                     "produces": ["application/json"],
+                    "consumes": ["application/json"],
                     "tags": [tagname],
                     ...security,
                     "responses": {
@@ -270,6 +270,7 @@ export async function generateSwagmeRouteFiles(docsFolder: string, swaggerRoutes
                     [method.toLowerCase()]: {
                         "summary": "API Documentation",
                         "produces": ["application/json"],
+                        "consumes": ["application/json"],
                         "tags": [tagname],
                         ...security,
                         "responses": {
