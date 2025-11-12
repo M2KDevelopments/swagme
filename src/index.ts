@@ -261,10 +261,10 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
         await generateREADME(docsFolder)
 
         // 3. Generate schema files
-        if (buildOptions.schemas && buildOptions.scanProjectFiles) await generateSwagmeSchemaFiles(docsFolder, swaggerSchemas);
+        if (buildOptions.schemas && buildOptions.scanProjectFiles) await generateSwagmeSchemaFiles(docsFolder, swaggerSchemas, buildOptions.json, buildOptions.yaml);
 
         // 4. Generate route files
-        if (buildOptions.routes && buildOptions.scanProjectFiles) await generateSwagmeRouteFiles(docsFolder, swaggerRoutes, answersForProject.authorization);
+        if (buildOptions.routes && buildOptions.scanProjectFiles) await generateSwagmeRouteFiles(docsFolder, swaggerRoutes, answersForProject.authorization, buildOptions.json, buildOptions.yaml);
 
         // 5. Update .gitignore if necessary
         await updateGitignore(answersForProject.gitignore, __currentWorkingDir, answersForProject.docs);
