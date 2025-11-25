@@ -1,0 +1,1 @@
+export type IORM = "prisma" | "drizzle" | "mongoose" |null

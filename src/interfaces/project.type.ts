@@ -1,0 +1,1 @@
+export type IProjectType = "nextjs" | "express" | null

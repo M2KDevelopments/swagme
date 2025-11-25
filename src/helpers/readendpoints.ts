@@ -1,6 +1,6 @@
 import { ISwagmeRoute } from "../interfaces/swagme.route";
-import fs from 'fs/promises';
-import path from 'path';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
 
 export async function getSwaggerInfoFromExpressRoutes(__currentWorkingDir: string, props: { routeFolder: string, mainFilePath: string, routesFileNames: Array<string> }) {

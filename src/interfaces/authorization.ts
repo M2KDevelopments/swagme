@@ -1,0 +1,1 @@
+export type IAuthorization = 'bearer' | 'basic' | 'none' | undefined | null

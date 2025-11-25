@@ -1,3 +1,4 @@
+import { IORM } from "../interfaces/orm";
 import { IPackageJSON } from "../interfaces/package.json";
 import { ISwaggerConfig } from "../interfaces/swagme.config";
 
@@ -6,7 +7,7 @@ export function getProjectPrompts(props: {
     config_json: ISwaggerConfig | any,
     package_json: IPackageJSON,
     schemaDefaultPath: string,
-    orm: string
+    orm: IORM
     projectType: 'nextjs' | 'express' | null
 }) {
 

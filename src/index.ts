@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // CLI Libraries
-import figlet from 'figlet';
+import * as  figlet from 'figlet';
 import chalk from 'chalk';
 import { program } from "commander";
 import inquirer from "inquirer";
@@ -9,8 +9,8 @@ import { getProjectPrompts } from './helpers/prompts';
 import { CONSTANTS } from './helpers/constants';
 
 // Node Libs for paths and files
-import path from 'path';
-import fs from 'fs/promises';
+import * as path from 'path';
+import * as fs from 'fs/promises';
 
 
 import { generateSwaggerFiles, createDocsFolder, generateSwagmeRouteFiles, generateSwagmeSchemaFiles, updateGitignore } from './helpers/creatingfiles';
@@ -30,7 +30,9 @@ import { getSwaggerInfoFromExpressRoutes, getSwaggerInfoFromNextJSRouter } from 
 import { ISwagmeSchema } from './interfaces/swagme.schema';
 import { ISwagmeRoute } from './interfaces/swagme.route';
 import { ISwaggerConfig } from './interfaces/swagme.config';
+import { IProjectType } from './interfaces/project.type';
 import SwagmePackageJson from '../package.json'
+import { IORM } from './interfaces/orm';
 
 interface BuildOptions {
     json: boolean,
@@ -41,7 +43,7 @@ interface BuildOptions {
 }
 
 
-async function run(congigure: boolean, askForDetails: boolean, build: boolean, pathdir: string, buildOptions: BuildOptions) {
+async function run(configure: boolean, askForDetails: boolean, build: boolean, pathdir: string, buildOptions: BuildOptions) {
 
     const __currentWorkingDir = pathdir || process.cwd()
 
@@ -50,11 +52,17 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
     const config_json = await readConfigJSON(__currentWorkingDir);
     if (error) return console.error(chalk.redBright(error));
 
+
+
     // Dependency Check
     if (!package_json || !package_json.dependencies) return console.error(chalk.redBright('Dependencies not found'));
 
+
+
     // Get Project Type
-    const projectType = await detectProjectType(__currentWorkingDir, package_json);
+    const projectType: IProjectType = await detectProjectType(__currentWorkingDir, package_json);
+
+
 
     // Lib Dependency Check
     if (projectType == 'express' && !package_json.dependencies.express) console.error(chalk.yellowBright('Express JS Dependency not found'), chalk.yellow(`run: 'npm i express'`));
@@ -69,8 +77,9 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
         )
     }
 
+
     // Detect ORM, prisma, drizzle or NONE
-    const orm = await detectORM(__currentWorkingDir)
+    const orm: IORM = await detectORM(__currentWorkingDir)
 
 
     let mainRouteFile: string = '';
@@ -99,7 +108,7 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
     const answersForProject = !askForDetails ? config_json : (await inquirer.prompt(prompts)) as ISwaggerConfig;
 
 
-    // Validation Checks
+    // Project Details Validation Checks
     if (!answersForProject.name && answersForProject.name.trim()) return console.error(chalk.redBright(`Please make sure you enter the name`))
     if (!answersForProject.routes && answersForProject.routes.trim()) return console.error(chalk.redBright(`Please make sure you enter the routes folder`))
 
@@ -114,7 +123,7 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
     }
 
     // Create Swagger Config Files
-    if (congigure) {
+    if (configure) {
         await fs.writeFile(
             path.join(__currentWorkingDir, CONSTANTS.config_file),  // file path
             JSON.stringify(answersForProject),  // answers of from user
@@ -261,17 +270,29 @@ async function run(congigure: boolean, askForDetails: boolean, build: boolean, p
         await generateREADME(docsFolder)
 
         // 3. Generate schema files
-        if (buildOptions.schemas && buildOptions.scanProjectFiles) await generateSwagmeSchemaFiles(docsFolder, swaggerSchemas, buildOptions.json, buildOptions.yaml);
+        let swaggerSchemaDataList = [];
+        if (buildOptions.schemas && buildOptions.scanProjectFiles) {
+            swaggerSchemaDataList = await generateSwagmeSchemaFiles(docsFolder, swaggerSchemas, buildOptions.json, buildOptions.yaml);
+        }
 
         // 4. Generate route files
-        if (buildOptions.routes && buildOptions.scanProjectFiles) await generateSwagmeRouteFiles(docsFolder, swaggerRoutes, answersForProject.authorization, buildOptions.json, buildOptions.yaml);
+        if (buildOptions.routes && buildOptions.scanProjectFiles) {
+            await generateSwagmeRouteFiles(docsFolder, swaggerRoutes, answersForProject.authorization, buildOptions.json, buildOptions.yaml);
+        }
 
         // 5. Update .gitignore if necessary
         await updateGitignore(answersForProject.gitignore, __currentWorkingDir, answersForProject.docs);
 
         // 6. Generate Swagger Json and/or Yaml files
         if (config_json && config_json.name && (buildOptions.json || buildOptions.yaml)) {
-            await generateSwaggerFiles(config_json, __currentWorkingDir, buildOptions.json, buildOptions.yaml);
+            await generateSwaggerFiles({
+                // swagme config file
+                config_json: config_json,
+                __currentWorkingDir: __currentWorkingDir,
+                // build files
+                json: buildOptions.json,
+                yaml: buildOptions.yaml
+            });
         }
     }
 

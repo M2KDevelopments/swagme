@@ -1,13 +1,15 @@
-import path from 'path';
-import fs from 'fs/promises';
+import * as path from 'path';
+import * as fs from 'fs/promises';
 import chalk from 'chalk';
 import { IPackageJSON } from '../interfaces/package.json';
 import { ISwaggerConfig } from '../interfaces/swagme.config';
 import { CONSTANTS } from './constants';
+import { IProjectType } from '../interfaces/project.type';
+import { IORM } from '../interfaces/orm';
 
 export async function readPackageJSON(__currentWorkingDir: string): Promise<{ json: IPackageJSON | null, error: string | null | any }> {
     try {
- 
+
         const package_json = await fs.readFile(path.join(__currentWorkingDir, 'package.json'), 'utf8');
         return { json: JSON.parse(package_json) as IPackageJSON, error: null }
     } catch (e) {
@@ -35,7 +37,7 @@ export async function readConfigJSON(__currentWorkingDir: string): Promise<ISwag
             authorization: undefined,
             baseurl: '',
             main: '',
-            database: 'unknown',
+            database: null,
             schema: '',
             routes: '',
             docs: '',
@@ -95,7 +97,7 @@ export async function getSchemaPathFromConfigFile(__currentWorkingDir: string, o
  * @param __currentWorkingDir - The current working directory of the project
  * @returns A string indicating which ORM tool is being used, or an empty string if none is detected
  */
-export async function detectORM(__currentWorkingDir: string): Promise<"prisma" | "drizzle" | ""> {
+export async function detectORM(__currentWorkingDir: string): Promise<IORM> {
     try {
         await fs.lstat(path.join(__currentWorkingDir, 'prisma.config.ts'));
         return "prisma";
@@ -112,12 +114,12 @@ export async function detectORM(__currentWorkingDir: string): Promise<"prisma" |
         await fs.lstat(path.join(__currentWorkingDir, 'drizzle.config.js'));
         return "drizzle";
     } catch (e) { }
-    return "";
+    return null;
 }
 
 
 
-export async function detectProjectType(__currentWorkingDir: string, packagejson: IPackageJSON): Promise<"nextjs" | "express" | null> {
+export async function detectProjectType(__currentWorkingDir: string, packagejson: IPackageJSON): Promise<IProjectType> {
     try {
         await fs.lstat(path.join(__currentWorkingDir, 'next.config.mjs'));
         return 'nextjs';

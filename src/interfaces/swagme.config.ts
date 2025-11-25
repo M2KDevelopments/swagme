@@ -1,11 +1,14 @@
+import { IAuthorization } from "./authorization";
+import { IORM } from "./orm";
+
 export interface ISwaggerConfig {
     name: string,
     version: string,
     description: string,
-    authorization: 'bearer' | 'basic' | 'none' | undefined,
+    authorization: IAuthorization,
     baseurl: string,
     main: string,
-    database: 'mongoose' | 'prisma' | 'drizzle' | 'unknown',
+    database: IORM,
     schema: string,
     routes: string,
     docs: string,
