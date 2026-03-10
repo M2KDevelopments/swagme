@@ -10,6 +10,19 @@ Node Js CLI tool that auto generates swagger api documentation for express web a
 
 ---
 
+## Features
+
+✅ **Auto-detect Express routes** - Scans your route files automatically  
+✅ **Database schema support** - Works with Mongoose, Prisma, and Drizzle  
+✅ **Multiple output formats** - Generate JSON and/or YAML  
+✅ **Interactive CLI** - User-friendly prompts for configuration  
+✅ **Auto mode** - Skip prompts for CI/CD pipelines  
+✅ **Gitignore integration** - Optionally add docs to .gitignore  
+✅ **Authorization support** - Configure API authorization schemes  
+
+---
+
+
 ## Quick Start
 This will interactively create **swag.config.json**, **swagger.json** and **swagger.yml** based on your project.
 ```bash
@@ -299,17 +312,6 @@ npx swagme run -y --scan
 
 ---
 
-## Features
-
-✅ **Auto-detect Express routes** - Scans your route files automatically  
-✅ **Database schema support** - Works with Mongoose, Prisma, and Drizzle  
-✅ **Multiple output formats** - Generate JSON and/or YAML  
-✅ **Interactive CLI** - User-friendly prompts for configuration  
-✅ **Auto mode** - Skip prompts for CI/CD pipelines  
-✅ **Gitignore integration** - Optionally add docs to .gitignore  
-✅ **Authorization support** - Configure API authorization schemes  
-
----
 
 ## Troubleshooting
 

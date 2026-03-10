@@ -55,7 +55,8 @@ export async function generateSwaggerFiles(props: { config_json: ISwaggerConfig,
              */
             "servers": [
                 {
-                    "url": config_json.baseurl || ""
+                    "url": config_json.baseurl || "",
+                    "description": "Local Server"
                 }
             ],
             /**
@@ -69,7 +70,9 @@ export async function generateSwaggerFiles(props: { config_json: ISwaggerConfig,
             /**
              * Paths
              */
-            "paths": {}
+            "paths": {
+                
+            }
         };
 
 
@@ -128,7 +131,7 @@ export async function generateSwaggerFiles(props: { config_json: ISwaggerConfig,
         }
 
         // Generate swagger.json and swagger.yaml file
-        if (json) await fs.writeFile(path.join(__currentWorkingDir, 'swagger.json'), JSON.stringify(swagger_json), 'utf-8');
+        if (json) await fs.writeFile(path.join(__currentWorkingDir, 'swagger.json'), JSON.stringify(swagger_json, null, 2), 'utf-8');
         if (yaml) await fs.writeFile(path.join(__currentWorkingDir, 'swagger.yml'), YAML.stringify(swagger_json).replace(/\.json/gmi, '.yml'), 'utf-8');
 
         if (json) console.log(chalk.green('swagger.json'), chalk.greenBright('file generated'));
@@ -221,7 +224,7 @@ export async function generateSwagmeSchemaFiles(docsFolder: string, swaggerSchem
         list.push({ tablename, schema: data });
 
         // Create Swagger Config Files
-        if (json) await fs.writeFile(path.join(docsFolder, "schemas", filename + ".json"), JSON.stringify(data), 'utf-8');
+        if (json) await fs.writeFile(path.join(docsFolder, "schemas", filename + ".json"), JSON.stringify(data, null, 2), 'utf-8');
         if (yaml) await fs.writeFile(path.join(docsFolder, "schemas", filename + ".yml"), YAML.stringify(data), 'utf-8');
 
         console.log('Model Added:', chalk.greenBright(tablename));
@@ -293,7 +296,7 @@ export async function generateSwagmeRouteFiles(docsFolder: string, swaggerRoutes
         }
 
         // Create Swagger Config Files
-        if (json) await fs.writeFile(path.join(docsFolder, "routes", filename + ".json"), JSON.stringify(endpoints), 'utf-8');
+        if (json) await fs.writeFile(path.join(docsFolder, "routes", filename + ".json"), JSON.stringify(endpoints, null, 2), 'utf-8');
         if (yaml) await fs.writeFile(path.join(docsFolder, "routes", filename + ".yml"), YAML.stringify(endpoints), 'utf-8');
 
     }

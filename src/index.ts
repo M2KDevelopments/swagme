@@ -54,7 +54,7 @@ async function run(configure: boolean, askForDetails: boolean, build: boolean, p
 
 
 
-    // Dependency Check
+    // Dependency Check: No express, mongoose or prisma
     if (!package_json || !package_json.dependencies) return console.error(chalk.redBright('Dependencies not found'));
 
 
@@ -122,11 +122,11 @@ async function run(configure: boolean, askForDetails: boolean, build: boolean, p
         )
     }
 
-    // Create Swagger Config Files
+    // Create Swagme Config Files
     if (configure) {
         await fs.writeFile(
             path.join(__currentWorkingDir, CONSTANTS.config_file),  // file path
-            JSON.stringify(answersForProject),  // answers of from user
+            JSON.stringify(answersForProject, null, 2),  // answers of from user
             'utf-8' //encoding
         );
     }
@@ -182,8 +182,8 @@ async function run(configure: boolean, askForDetails: boolean, build: boolean, p
                 try {
                     const list = await fs.readdir(path.join(__currentWorkingDir, folder));
                     schemaFiles.push(...list
-                        .filter(file => file.endsWith('.ts') || file.endsWith('.js'))
-                        .map(file => `${folder}/${file}`)
+                        .filter((file:string) => file.endsWith('.ts') || file.endsWith('.js'))
+                        .map((file:string) => `${folder}/${file}`)
                     );
                 } catch (e) {
                     return console.error(
